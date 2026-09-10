@@ -177,6 +177,40 @@ def list_orders_for_store(
     return [_order_from_row(row) for row in rows]
 
 
+def list_orders_for_products(
+    conn: sqlite3.Connection,
+    product_ids: list[int],
+    *,
+    user_id: int | None = None,
+    store_id: int | None = None,
+    limit: int = 1000,
+) -> list[Order]:
+    """Orders containing any of `product_ids`, optionally scoped to a user or store.
+
+    Filtering by product first (a small set) means the role scope never has
+    to cap the order pool by recency before matching, which matters for
+    support search across every order on the platform.
+    """
+    if not product_ids:
+        return []
+    placeholders = ",".join("?" for _ in product_ids)
+    clauses = [f"product_id IN ({placeholders})"]
+    params: list[Any] = list(product_ids)
+    if user_id is not None:
+        clauses.append("user_id = ?")
+        params.append(user_id)
+    if store_id is not None:
+        clauses.append("store_id = ?")
+        params.append(store_id)
+    params.append(limit)
+    rows = conn.execute(
+        f"SELECT * FROM orders WHERE {' AND '.join(clauses)} "
+        "ORDER BY ordered_at DESC, id DESC LIMIT ?",
+        params,
+    ).fetchall()
+    return [_order_from_row(row) for row in rows]
+
+
 def list_products(
     conn: sqlite3.Connection, store_id: int | None = None
 ) -> list[Product]:
@@ -219,6 +253,42 @@ def insert_refund(
     )
     conn.commit()
     return int(cursor.lastrowid)
+
+
+@dataclass(frozen=True)
+class Refund:
+    id: int
+    order_id: int
+    amount_cents: int
+    reason: str
+    status: str
+    created_at: str
+
+    @property
+    def amount_usd(self) -> float:
+        return self.amount_cents / 100
+
+
+def get_latest_refund_for_order(conn: sqlite3.Connection, order_id: int) -> Refund | None:
+    """The authoritative refund record for an order (there is at most one in
+
+    practice, but if a second were ever submitted, the most recent one is the
+    one that matters).
+    """
+    row = conn.execute(
+        "SELECT * FROM refunds WHERE order_id = ? ORDER BY created_at DESC, id DESC LIMIT 1",
+        (order_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return Refund(
+        id=row["id"],
+        order_id=row["order_id"],
+        amount_cents=row["amount_cents"],
+        reason=row["reason"],
+        status=row["status"],
+        created_at=row["created_at"],
+    )
 
 
 def insert_escalation(

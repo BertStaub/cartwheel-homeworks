@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartwheel Trace Viewer</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Cartwheel Trace Viewer <span class="tag">read-only</span></h1>
+  <div id="conn-status" class="conn-status">checking Langfuse…</div>
+</header>
+
+<main id="view-list" class="view">
+  <div class="toolbar">
+    <label>Role
+      <select id="filter-role">
+        <option value="">all</option>
+        <option value="shopper">shopper</option>
+        <option value="merchant">merchant</option>
+        <option value="support">support</option>
+      </select>
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" id="filter-issues">
+      Issues only
+    </label>
+    <input type="search" id="filter-search" placeholder="Search request / reply text…">
+    <button id="refresh-btn" type="button">Refresh</button>
+  </div>
+
+  <div class="diff-bar">
+    <span id="diff-selection-info">Check 2 traces below to diff their prompts</span>
+    <button id="diff-btn" type="button" disabled>Diff prompts →</button>
+  </div>
+
+  <div id="list-status" class="status-line"></div>
+  <table class="trace-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Status</th>
+        <th>Time</th>
+        <th>Role</th>
+        <th>User</th>
+        <th>Prompt</th>
+        <th>Request</th>
+        <th>Reply</th>
+        <th>Tools</th>
+        <th>Latency</th>
+        <th>Cost</th>
+      </tr>
+    </thead>
+    <tbody id="trace-rows"></tbody>
+  </table>
+
+  <div class="pager">
+    <button id="prev-page" type="button">← Prev</button>
+    <span id="page-info"></span>
+    <button id="next-page" type="button">Next →</button>
+  </div>
+</main>
+
+<main id="view-detail" class="view" hidden>
+  <a href="#/" class="back-link">← Back to traces</a>
+  <div id="detail-content"></div>
+</main>
+
+<main id="view-diff" class="view" hidden>
+  <a href="#/" class="back-link">← Back to traces</a>
+  <div id="diff-content"></div>
+</main>
+
+<template id="tpl-tool-call">
+  <details class="tool-card">
+    <summary>
+      <span class="tool-badge"></span>
+      <span class="tool-name"></span>
+      <span class="tool-latency"></span>
+      <span class="tool-id"></span>
+    </summary>
+    <div class="tool-body">
+      <div class="field"><span class="field-label">Observation ID</span><span class="tool-obs-id"></span></div>
+      <div class="field"><span class="field-label">Start</span><span class="tool-start"></span></div>
+      <div class="field"><span class="field-label">End</span><span class="tool-end"></span></div>
+      <div class="field"><span class="field-label">Level</span><span class="tool-level"></span></div>
+      <div class="field"><span class="field-label">Status message</span><span class="tool-status-message"></span></div>
+      <div class="field"><span class="field-label">Permission denied</span><span class="tool-permission-denied"></span></div>
+      <div class="field-block">
+        <span class="field-label">Arguments</span>
+        <pre class="tool-args"></pre>
+      </div>
+      <div class="field-block">
+        <span class="field-label">Result</span>
+        <pre class="tool-output"></pre>
+      </div>
+      <details class="raw-block span-raw">
+        <summary>Raw span (unmodified observation)</summary>
+        <pre class="tool-raw"></pre>
+      </details>
+    </div>
+  </details>
+</template>
+
+<template id="tpl-generation-card">
+  <details class="tool-card generation-card">
+    <summary>
+      <span class="tool-badge"></span>
+      <span class="tool-name">Model call</span>
+      <span class="tool-latency"></span>
+      <span class="tool-id"></span>
+    </summary>
+    <div class="tool-body">
+      <div class="field"><span class="field-label">Observation ID</span><span class="gen-obs-id"></span></div>
+      <div class="field"><span class="field-label">Model</span><span class="gen-model"></span></div>
+      <div class="field"><span class="field-label">Start</span><span class="gen-start"></span></div>
+      <div class="field"><span class="field-label">End</span><span class="gen-end"></span></div>
+      <div class="field"><span class="field-label">Level</span><span class="gen-level"></span></div>
+      <div class="field"><span class="field-label">Status message</span><span class="gen-status-message"></span></div>
+      <div class="field"><span class="field-label">Total tokens</span><span class="gen-tokens"></span></div>
+      <div class="field"><span class="field-label">Total cost</span><span class="gen-cost"></span></div>
+      <details class="raw-block span-raw">
+        <summary>Raw span (unmodified observation, includes the full input message history)</summary>
+        <pre class="gen-raw"></pre>
+      </details>
+    </div>
+  </details>
+</template>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

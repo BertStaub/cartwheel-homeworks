@@ -8,7 +8,7 @@
 data/cartwheel.db
 
 # Local conversation state and scenario/replay run outputs.
-.sessions.db
+.sessions.db*
 scenarios/results/
 replay/results/
 
@@ -17,3 +17,7 @@ __pycache__/
 *.pyc
 .venv/
 .pytest_cache/
+
+# Personal prep notes, not a graded deliverable.
+hw1-video-talking-points.md
+hw2-video-talking-points.md

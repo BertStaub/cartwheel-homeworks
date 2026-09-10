@@ -105,7 +105,17 @@ reports/
   smoke.sql               smoke-report queries against the trace store
 homework/                 student assignments for Modules 1 to 5
 tests/                    offline, no API keys; homework tests are xfail until done
+traceviewer/              personal tool, not a homework deliverable: read-only Langfuse trace viewer (see traceviewer/README.md)
 ```
+
+## Local ports
+
+| Port | What |
+| --- | --- |
+| 3000 | Langfuse UI and API (`observability/docker-compose.yml`) |
+| 8010 | Agent server (`server/app.py`), Homework 2 |
+| 8020 / 8021 | Module 2 review interface (`analysis/server.py`) |
+| 8030 | Trace viewer (`traceviewer/app.py`), not a homework deliverable |
 
 ## Module 1 implementation tasks
 

@@ -20,13 +20,17 @@ from __future__ import annotations
 
 from typing import Any
 
+from rapidfuzz import fuzz
+
 from agent import db
-from agent.auth import AuthContext, can_cancel_order, permission_denied
+from agent.auth import AuthContext, can_cancel_order, can_view_order, permission_denied
 from agent.helpcenter import load_policy_docs
 from agent.killswitch import kill_switch
 
 MAX_SEARCH_LIMIT = 25
 DEFAULT_ORDER_LIMIT = 20
+FIND_ORDER_LIMIT = 5
+FIND_ORDER_MATCH_THRESHOLD = 60
 
 
 def get_policy(ctx: AuthContext, policy_id: str) -> dict[str, Any]:
@@ -52,8 +56,20 @@ def get_policy(ctx: AuthContext, policy_id: str) -> dict[str, Any]:
     Implementation notes:
         agent.helpcenter.load_policy_docs() returns every parsed doc.
     """
-    ### YOUR CODE HERE (HW1)
-    raise NotImplementedError("HW1: implement get_policy")
+    for doc in load_policy_docs():
+        if doc.policy_id == policy_id:
+            return {
+                "ok": True,
+                "policy_id": doc.policy_id,
+                "title": doc.title,
+                "audience": doc.audience,
+                "body": doc.body,
+            }
+    return {
+        "ok": False,
+        "error": "not_found",
+        "reason": f"no policy doc with id {policy_id!r}",
+    }
 
 
 def search_products(
@@ -95,8 +111,54 @@ def search_products(
         agent.db.list_products(conn, store_id) gives the candidate set.
         Use `with db.connection() as conn:` to close the database automatically.
     """
-    ### YOUR CODE HERE (HW1)
-    raise NotImplementedError("HW1: implement search_products")
+    query = query.strip()
+    if not query:
+        return {"ok": False, "error": "invalid_argument", "reason": "empty query"}
+    if max_price_usd is not None and max_price_usd <= 0:
+        return {
+            "ok": False,
+            "error": "invalid_argument",
+            "reason": f"max_price_usd must be positive, got {max_price_usd}",
+        }
+    limit = max(1, min(limit, MAX_SEARCH_LIMIT))
+
+    tokens = query.lower().split()
+
+    with db.connection() as conn:
+        store_id = None
+        if store is not None:
+            found_store = db.get_store_by_name(conn, store)
+            if found_store is None:
+                return {
+                    "ok": False,
+                    "error": "not_found",
+                    "reason": f"no store named {store!r}",
+                }
+            store_id = found_store.id
+        candidates = db.list_products(conn, store_id)
+
+    matches = []
+    for product in candidates:
+        haystack = f"{product.title} {product.description}".lower()
+        if not all(token in haystack for token in tokens):
+            continue
+        if max_price_usd is not None and product.price_usd > max_price_usd:
+            continue
+        matches.append(product)
+
+    matches.sort(key=lambda p: (p.price_usd, p.id))
+    matches = matches[:limit]
+
+    products = [
+        {
+            "product_id": p.id,
+            "store_id": p.store_id,
+            "title": p.title,
+            "price_usd": p.price_usd,
+        }
+        for p in matches
+    ]
+    return {"ok": True, "products": products, "count": len(products)}
 
 
 def list_my_orders(ctx: AuthContext) -> dict[str, Any]:
@@ -121,8 +183,29 @@ def list_my_orders(ctx: AuthContext) -> dict[str, Any]:
         scope is baked into which query you run. That is the point of the
         tool: the model cannot ask for someone else's orders through it.
     """
-    ### YOUR CODE HERE (HW1)
-    raise NotImplementedError("HW1: implement list_my_orders")
+    if ctx.role == "support":
+        return {
+            "ok": False,
+            "error": "invalid_argument",
+            "reason": "support staff have no orders of their own; use get_order",
+        }
+    with db.connection() as conn:
+        if ctx.role == "shopper":
+            orders = db.list_orders_for_user(
+                conn, ctx.user_id, limit=DEFAULT_ORDER_LIMIT
+            )
+        elif ctx.role == "merchant":
+            orders = db.list_orders_for_store(
+                conn, ctx.store_id, limit=DEFAULT_ORDER_LIMIT
+            )
+        else:
+            return {
+                "ok": False,
+                "error": "invalid_argument",
+                "reason": f"unrecognized role {ctx.role!r}",
+            }
+    payload = [order.to_public_dict() for order in orders]
+    return {"ok": True, "orders": payload, "count": len(payload)}
 
 
 def cancel_order(ctx: AuthContext, order_id: int, reason: str) -> dict[str, Any]:
@@ -167,8 +250,25 @@ def cancel_order(ctx: AuthContext, order_id: int, reason: str) -> dict[str, Any]
     paused = kill_switch("cancel_order")
     if paused is not None:
         return {"ok": False, "error": "paused", "reason": paused}
-    ### YOUR CODE HERE (HW1)
-    raise NotImplementedError("HW1: implement cancel_order")
+    with db.connection() as conn:
+        order = db.get_order(conn, order_id)
+        if order is None:
+            return {"ok": False, "error": "not_found", "reason": f"no order #{order_id}"}
+        if not can_cancel_order(ctx, order.user_id, order.store_id):
+            return permission_denied(
+                f"role '{ctx.role}' (user {ctx.user_id}) may not cancel order #{order_id}"
+            )
+        if order.status != "placed":
+            return {
+                "ok": False,
+                "error": "not_eligible",
+                "reason": (
+                    f"order #{order_id} has status {order.status!r}; "
+                    "orders can be cancelled only before shipment"
+                ),
+            }
+        db.set_order_status(conn, order_id, "cancelled")
+    return {"ok": True, "order_id": order_id, "status": "cancelled"}
 
 
 def find_order(ctx: AuthContext, query: str) -> dict[str, Any]:
@@ -196,5 +296,106 @@ def find_order(ctx: AuthContext, query: str) -> dict[str, Any]:
         (at most 5), each as the dict returned by agent.db. If no orders
         match, return {"ok": True, "orders": []}.
     """
-    ### YOUR CODE HERE (HW1)
-    raise NotImplementedError("HW1: implement find_order")
+    with db.connection() as conn:
+        # Match against the (small) product catalog first, not per-order.
+        # Filtering orders by recency before matching would cap the search
+        # to a handful of orders platform-wide -- useless for support, who
+        # searches across every order, not just their own most recent ones.
+        #
+        # partial_ratio finds the best-aligned substring match, so a short
+        # query like "earmuffs" still scores well against a longer title.
+        # The threshold discards low-similarity noise (e.g. a nonsense
+        # query), but many products can still clear it unevenly -- e.g. an
+        # exact "Heavy-Duty Vase" match (100) vs. an unrelated "Heavy-Duty
+        # Webcam" that only shares a word (86). Keep each product's score so
+        # a same-day order for a weak match can't outrank an older order for
+        # the real match.
+        score_by_product_id = {
+            product.id: fuzz.partial_ratio(query.lower(), product.title.lower())
+            for product in db.list_products(conn)
+        }
+        matched_product_ids = [
+            product_id
+            for product_id, score in score_by_product_id.items()
+            if score >= FIND_ORDER_MATCH_THRESHOLD
+        ]
+        if not matched_product_ids:
+            return {"ok": True, "orders": []}
+
+        # Scope the matched orders by role, same dispatch as list_my_orders,
+        # but support searches across every order instead of being refused.
+        if ctx.role == "shopper":
+            orders = db.list_orders_for_products(
+                conn, matched_product_ids, user_id=ctx.user_id
+            )
+        elif ctx.role == "merchant":
+            orders = db.list_orders_for_products(
+                conn, matched_product_ids, store_id=ctx.store_id
+            )
+        elif ctx.role == "support":
+            orders = db.list_orders_for_products(conn, matched_product_ids)
+        else:
+            return {
+                "ok": False,
+                "error": "invalid_argument",
+                "reason": f"unrecognized role {ctx.role!r}",
+            }
+
+    # Best product match first, newest order as the tiebreaker, capped at 5.
+    orders.sort(
+        key=lambda o: (score_by_product_id[o.product_id], o.ordered_at),
+        reverse=True,
+    )
+    payload = [order.to_public_dict() for order in orders[:FIND_ORDER_LIMIT]]
+    return {"ok": True, "orders": payload}
+
+
+def get_refund_status(ctx: AuthContext, order_id: int) -> dict[str, Any]:
+    """Look up an order's actual refund record. Risk tier: read.
+
+    orders.status can say "refunded" for an order whose refund is still
+    "queued_for_approval" in the refunds table (a human hasn't approved it
+    yet), because seeded/completed orders and the refund's own approval
+    state are tracked separately. This tool reports the refunds table
+    directly instead of the order's summary status, so the agent isn't
+    forced to guess or overstate what has actually happened.
+
+    Access rules match get_order: shoppers see their own orders, merchants
+    their own store's orders, support any order.
+
+    Args:
+        ctx: The caller's auth context.
+        order_id: The order to check.
+
+    Returns:
+        On success: {"ok": True, "order_id": order_id, "refund_id": int,
+        "amount_usd": float, "status": "auto_approved" | "queued_for_approval",
+        "created_at": str}.
+        If no order has this id: {"ok": False, "error": "not_found", ...}.
+        If the order is outside the caller's scope: permission_denied.
+        If the order has no refund on file: {"ok": False, "error":
+        "not_found", "reason": ...} naming the order id.
+    """
+    with db.connection() as conn:
+        order = db.get_order(conn, order_id)
+        if order is None:
+            return {"ok": False, "error": "not_found", "reason": f"no order #{order_id}"}
+        if not can_view_order(ctx, order.user_id, order.store_id):
+            return permission_denied(
+                f"role '{ctx.role}' (user {ctx.user_id}) may not view order #{order_id}"
+            )
+        refund = db.get_latest_refund_for_order(conn, order_id)
+    if refund is None:
+        return {
+            "ok": False,
+            "error": "not_found",
+            "reason": f"no refund on file for order #{order_id}",
+        }
+    return {
+        "ok": True,
+        "order_id": order_id,
+        "refund_id": refund.id,
+        "amount_usd": refund.amount_usd,
+        "status": refund.status,
+        "created_at": refund.created_at,
+    }

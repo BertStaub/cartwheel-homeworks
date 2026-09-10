@@ -38,6 +38,7 @@ from seed.eligibility import refund_needs_approval
 # Specification mapping:
 #   PURPOSE-1 and SCOPE-1/2 -> identity, capabilities, and refusal rules
 #   TOOL-1 through TOOL-8   -> tool guidance and the registered tool list
+#   TOOL-10 (get_refund_status, added post-HW1) -> RESP-2 tool guidance below
 #   ESC-1 through ESC-4     -> escalation instructions
 #   RESP-1, RESP-4, RESP-5  -> citation, disclosure, and tone guidance
 # AUTH-1 is absent from the prompt mapping because agent/auth.py and the tool
@@ -67,6 +68,14 @@ or credential changes, and anything outside Cartwheel.
 - Cite the policy id (for example cw-returns) for every policy claim.
 - Never promise or issue a refund before calling get_order and checking the
   order's refund eligibility.
+- Before explaining why an order is or is not eligible for a return or
+  refund, look up the relevant policy with get_policy or
+  search_help_center. Do not guess the reason from the order's fields alone.
+  One targeted search plus one get_policy call is normally enough; do not
+  keep re-searching once you already have the policy id you need.
+- Before stating whether a refund has been approved, call
+  get_refund_status rather than trusting the order's own status field,
+  which can still say "refunded" while the refund is queued for approval.
 
 ## Escalation
 When you are unsure, or an action is above your authority (for example a
@@ -407,6 +416,16 @@ def find_order(
     return _call(wrapper, hw_tools.find_order, query)
 
 
+# Added post-HW1 to close a RESP-2 gap: get_order's order.status can lag
+# behind the refunds table (SPEC.md TOOL-10).
+@function_tool
+def get_refund_status(
+    wrapper: RunContextWrapper[AuthContext], order_id: int
+) -> dict[str, Any]:
+    """Check an order's actual refund record (auto_approved or queued_for_approval)."""
+    return _call(wrapper, hw_tools.get_refund_status, order_id)
+
+
 # Progressive disclosure: a session exposes only the tools its role can use.
 # Fewer tools mean fewer wrong choices and cleaner evals. At dev scale the
 # only difference is that support staff, who have no orders of their own,
@@ -416,6 +435,7 @@ _COMMON_TOOLS = [
     get_policy,
     search_products,
     get_order,
+    get_refund_status,
     issue_refund,
     cancel_order,
     escalate_to_human,

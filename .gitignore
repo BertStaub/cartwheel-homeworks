@@ -19,7 +19,7 @@ __pycache__/
 .pytest_cache/
 
 # Personal prep notes, not a graded deliverable.
-hw1-video-talking-points.md
-hw2-video-talking-points.md
+#hw1-video-talking-points.md
+#hw2-video-talking-points.md
 
-scenarios/demo_pilot_gt.json
+#scenarios/demo_pilot_gt.json

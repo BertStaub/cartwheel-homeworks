@@ -1,8 +1,11 @@
 "use strict";
 
-/* Cartwheel Trace Viewer — read-only frontend. No annotation state, no
- * local storage of trace data; everything is re-fetched from the backend
- * (which itself re-fetches from Langfuse) on every navigation. */
+/* Cartwheel Trace Viewer frontend. No local storage of trace data itself --
+ * everything is re-fetched from the backend (which itself re-fetches from
+ * Langfuse) on every navigation. Two things you type here do get written
+ * back: a note on a generation/tool-call span (to Langfuse, permanently --
+ * see the notes-modal functions) and the pilot review form (upserted into
+ * scenarios/pilot_review.jsonl). */
 
 const state = {
   page: 1,
@@ -88,6 +91,25 @@ async function fetchJSON(url) {
   return resp.json();
 }
 
+async function postJSON(url, body) {
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) {
+    let detail = resp.statusText;
+    try {
+      const data = await resp.json();
+      detail = data.detail || detail;
+    } catch (e) {
+      /* ignore */
+    }
+    throw new Error(`${resp.status}: ${detail}`);
+  }
+  return resp.json();
+}
+
 // ---------------------------------------------------------------------------
 // Connection status (checked once on load)
 // ---------------------------------------------------------------------------
@@ -156,9 +178,6 @@ function renderList() {
     const statusBadge = t.has_error
       ? '<span class="badge error">⚠ issue</span>'
       : '<span class="badge ok">clean</span>';
-    const tools = (t.tool_names || [])
-      .map((n) => `<span class="pill">${esc(n)}</span>`)
-      .join("");
     const checked = state.diffSelection.includes(t.trace_id) ? "checked" : "";
     tr.innerHTML = `
       <td class="select-col"><input type="checkbox" class="diff-checkbox" ${checked}></td>
@@ -167,9 +186,9 @@ function renderList() {
       <td>${fmtVal(t.user_role)}</td>
       <td class="mono">${fmtVal(t.user_id)}</td>
       <td class="mono">${fmtVal(t.prompt_version)}</td>
-      <td class="preview"><div class="preview-clamp">${t.input_preview ? esc(t.input_preview) : missingSpan()}</div></td>
-      <td class="preview"><div class="preview-clamp">${t.output_preview ? esc(t.output_preview) : missingSpan()}</div></td>
-      <td>${tools || missingSpan()}</td>
+      <td class="mono">${fmtVal(t.scenario_id)}</td>
+      <td class="mono">${fmtVal(t.turn_count)}</td>
+      <td class="mono">${fmtVal(t.tool_count)}</td>
       <td class="nowrap">${fmtLatency(t.latency)}</td>
       <td class="nowrap">${fmtCost(t.total_cost)}</td>
     `;
@@ -245,7 +264,7 @@ function setupListControls() {
 // Detail view
 // ---------------------------------------------------------------------------
 
-function renderToolCall(tc) {
+function renderToolCall(tc, traceId) {
   const tpl = document.getElementById("tpl-tool-call");
   const node = tpl.content.cloneNode(true);
   const card = node.querySelector(".tool-card");
@@ -255,6 +274,7 @@ function renderToolCall(tc) {
   card.querySelector(".tool-latency").textContent =
     tc.latency !== null && tc.latency !== undefined ? `${(tc.latency * 1000).toFixed(0)} ms` : "";
   card.querySelector(".tool-id").textContent = tc.observation_id || "";
+  wireNotesButton(card, traceId, tc);
 
   card.querySelector(".tool-obs-id").innerHTML = fmtVal(tc.observation_id);
   card.querySelector(".tool-start").innerHTML = fmtTime(tc.start_time);
@@ -285,7 +305,7 @@ function renderToolCall(tc) {
   return node;
 }
 
-function renderGenerationCard(gen) {
+function renderGenerationCard(gen, traceId) {
   const tpl = document.getElementById("tpl-generation-card");
   const node = tpl.content.cloneNode(true);
   const card = node.querySelector(".tool-card");
@@ -297,6 +317,7 @@ function renderGenerationCard(gen) {
   card.querySelector(".tool-latency").textContent =
     gen.latency !== null && gen.latency !== undefined ? `${(gen.latency * 1000).toFixed(0)} ms` : "";
   card.querySelector(".tool-id").textContent = gen.observation_id || "";
+  wireNotesButton(card, traceId, gen);
 
   card.querySelector(".gen-obs-id").innerHTML = fmtVal(gen.observation_id);
   card.querySelector(".gen-model").innerHTML = fmtVal(gen.model);
@@ -313,7 +334,121 @@ function renderGenerationCard(gen) {
   return node;
 }
 
-function renderTurn(turn) {
+// ---------------------------------------------------------------------------
+// Notes popup. Every generation/tool-call span carries its own `notes`
+// array and `observation_id` (see _attach_notes in app.py) and posts to its
+// own observation URL; the assistant reply isn't a span at all (it's
+// trace.output), so it carries `conversation.notes` instead and posts to
+// the trace-level notes URL. Either way the modal itself only needs a
+// postUrl, the current notes array, and a badge element to update.
+// ---------------------------------------------------------------------------
+
+const notesModal = { postUrl: null, notes: null, badgeEl: null };
+
+function updateNotesBadge(badgeEl, count) {
+  badgeEl.textContent = count > 0 ? String(count) : "";
+  badgeEl.closest(".notes-btn").classList.toggle("has-notes", count > 0);
+}
+
+function wireNotesButton(card, traceId, span) {
+  const btn = card.querySelector(".notes-btn");
+  const badge = btn.querySelector(".notes-count");
+  updateNotesBadge(badge, span.notes.length);
+  const postUrl = `/api/traces/${encodeURIComponent(traceId)}/observations/${encodeURIComponent(span.observation_id)}/notes`;
+  const label = span.name || (span.model ? `model call (${span.model})` : "model call");
+  btn.addEventListener("click", (e) => {
+    e.preventDefault(); // don't also toggle the <details> open/closed
+    e.stopPropagation();
+    openNotesModal(postUrl, span.notes, badge, label);
+  });
+}
+
+// The whole assistant-reply card is clickable (it's a plain div, not a
+// <details> that a click would otherwise toggle) and posts a trace-level
+// comment, since the reply itself has no observation id of its own.
+function wireCardNotes(cardEl, badgeEl, traceId, notes, label) {
+  const postUrl = `/api/traces/${encodeURIComponent(traceId)}/notes`;
+  updateNotesBadge(badgeEl, notes.length);
+  cardEl.classList.add("notes-clickable");
+  cardEl.title = "Click to view or add a note on this reply";
+  cardEl.addEventListener("click", () => openNotesModal(postUrl, notes, badgeEl, label));
+}
+
+function renderNotesList() {
+  const list = document.getElementById("notes-modal-list");
+  list.innerHTML = "";
+  if (notesModal.notes.length === 0) {
+    list.innerHTML = '<span class="missing">no notes yet</span>';
+    return;
+  }
+  for (const n of notesModal.notes) {
+    const item = document.createElement("div");
+    item.className = "note-item";
+    const time = document.createElement("span");
+    time.className = "note-time";
+    time.textContent = new Date(n.created_at).toLocaleString();
+    const content = document.createElement("div");
+    content.className = "note-content";
+    content.textContent = n.content;
+    item.appendChild(time);
+    item.appendChild(content);
+    list.appendChild(item);
+  }
+}
+
+function openNotesModal(postUrl, notes, badgeEl, label) {
+  notesModal.postUrl = postUrl;
+  notesModal.notes = notes;
+  notesModal.badgeEl = badgeEl;
+
+  document.getElementById("notes-modal-title").textContent = label ? `Notes — ${label}` : "Notes";
+  document.getElementById("notes-modal-textarea").value = "";
+  const status = document.getElementById("notes-modal-status");
+  status.textContent = "";
+  status.className = "note-status";
+  renderNotesList();
+  document.getElementById("notes-modal").hidden = false;
+  document.getElementById("notes-modal-textarea").focus();
+}
+
+function closeNotesModal() {
+  document.getElementById("notes-modal").hidden = true;
+}
+
+async function saveNoteFromModal() {
+  const textarea = document.getElementById("notes-modal-textarea");
+  const status = document.getElementById("notes-modal-status");
+  const saveBtn = document.getElementById("notes-modal-save");
+  const content = textarea.value.trim();
+  if (!content) return;
+
+  saveBtn.disabled = true;
+  status.textContent = "saving…";
+  status.className = "note-status";
+  try {
+    const note = await postJSON(notesModal.postUrl, { content });
+    notesModal.notes.push({ id: note.id, content, created_at: new Date().toISOString() });
+    updateNotesBadge(notesModal.badgeEl, notesModal.notes.length);
+    textarea.value = "";
+    status.textContent = "saved";
+    renderNotesList();
+  } catch (e) {
+    status.textContent = `failed: ${e.message}`;
+    status.className = "note-status error";
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
+
+function setupNotesModal() {
+  document.getElementById("notes-modal-close").addEventListener("click", closeNotesModal);
+  document.getElementById("notes-modal-save").addEventListener("click", saveNoteFromModal);
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !document.getElementById("notes-modal").hidden) closeNotesModal();
+  });
+}
+
+function renderTurn(turn, traceId) {
   const wrap = document.createElement("div");
   wrap.className = "turn";
 
@@ -337,10 +472,10 @@ function renderTurn(turn) {
   wrap.appendChild(divider);
 
   if (turn.generation) {
-    wrap.appendChild(renderGenerationCard(turn.generation));
+    wrap.appendChild(renderGenerationCard(turn.generation, traceId));
   }
   for (const tc of turn.tool_calls) {
-    wrap.appendChild(renderToolCall(tc));
+    wrap.appendChild(renderToolCall(tc, traceId));
   }
 
   return wrap;
@@ -370,73 +505,156 @@ async function loadDetail(traceId) {
   container.innerHTML = `<p class="status-line">loading trace ${esc(traceId)}…</p>`;
   try {
     const data = await fetchJSON(`/api/traces/${encodeURIComponent(traceId)}`);
-    renderDetail(data);
+    let reviewState = { scenario_id: null, existing: null };
+    try {
+      // The review is keyed by scenario_id, which is the same across every
+      // exchange in a session, so any one exchange's trace_id works here.
+      const reviewTraceId = data.exchanges[0].trace_id;
+      reviewState = await fetchJSON(`/api/traces/${encodeURIComponent(reviewTraceId)}/review`);
+    } catch (e) {
+      /* Review state is a nice-to-have; a failure here shouldn't block the
+       * rest of the trace from rendering. */
+    }
+    renderDetail(data, reviewState);
   } catch (e) {
     container.innerHTML = `<p class="status-line error">failed to load trace: ${esc(e.message)}</p>`;
   }
 }
 
-function renderDetail(data) {
-  const c = data.conversation;
-  const container = document.getElementById("detail-content");
-  container.innerHTML = "";
+function renderReviewForm(traceId, reviewState) {
+  const section = document.createElement("section");
+  section.className = "block review-block";
+  section.innerHTML = "<h3>Pilot review — scenarios/pilot_review.jsonl</h3>";
 
-  // Header ---------------------------------------------------------------
-  const header = document.createElement("div");
-  header.className = "detail-header";
-  const statusBadge = data.has_error
-    ? '<span class="badge error">⚠ issue found</span>'
-    : '<span class="badge ok">clean</span>';
-  header.innerHTML = `
-    <h2>${esc(data.trace_id)} ${statusBadge}</h2>
-    <div class="detail-attrs">
-      <div class="attr"><span class="field-label">Role</span>${fmtVal(c.user_role)}</div>
-      <div class="attr"><span class="field-label">User ID</span>${fmtVal(c.user_id)}</div>
-      <div class="attr"><span class="field-label">Store ID</span>${fmtVal(c.store_id)}</div>
-      <div class="attr"><span class="field-label">Prompt version</span>${fmtVal(c.prompt_version)}</div>
-      <div class="attr"><span class="field-label">Scenario ID</span>${fmtVal(c.scenario_id)}</div>
-      <div class="attr"><span class="field-label">Langfuse</span><a class="permalink" href="${esc(data.permalink)}" target="_blank" rel="noopener">open in Langfuse ↗</a></div>
+  const scenarioId = reviewState.scenario_id;
+  if (!scenarioId) {
+    const note = document.createElement("p");
+    note.className = "missing";
+    note.textContent =
+      "no cartwheel.scenario_id on this trace — not a scenario-runner request, nothing to record a pilot review against";
+    section.appendChild(note);
+    return section;
+  }
+
+  const existing = reviewState.existing;
+  const form = document.createElement("div");
+  form.className = "review-form";
+  form.innerHTML = `
+    <div class="field"><span class="field-label">Scenario ID</span><span class="mono">${esc(scenarioId)}</span></div>
+    <label class="checkbox"><input type="checkbox" class="rv-valid"> scenario_valid</label>
+    <label class="checkbox"><input type="checkbox" class="rv-failure"> confirmed_failure</label>
+    <div class="field-block">
+      <span class="field-label">Evidence</span>
+      <textarea class="rv-evidence" placeholder="database value, policy, tool result, or requirement that supports your decision"></textarea>
     </div>
+    <div class="field-block">
+      <span class="field-label">Scenario change (leave blank if none needed)</span>
+      <textarea class="rv-change"></textarea>
+    </div>
+    <div class="note-form-row"><button type="button" class="rv-save">Save review</button><span class="rv-status"></span></div>
   `;
-  container.appendChild(header);
+  const validCb = form.querySelector(".rv-valid");
+  const failureCb = form.querySelector(".rv-failure");
+  const evidenceEl = form.querySelector(".rv-evidence");
+  const changeEl = form.querySelector(".rv-change");
+  const status = form.querySelector(".rv-status");
 
-  // Conversation -----------------------------------------------------------
-  const convo = document.createElement("section");
-  convo.className = "block";
-  convo.innerHTML = "<h3>Conversation</h3>";
+  if (existing) {
+    validCb.checked = !!existing.scenario_valid;
+    failureCb.checked = !!existing.confirmed_failure;
+    evidenceEl.value = existing.evidence || "";
+    changeEl.value = existing.scenario_change || "";
+  }
+
+  // confirmed_failure only counts when scenario_valid is true (hw3.md).
+  function syncFailureEnabled() {
+    failureCb.disabled = !validCb.checked;
+    if (!validCb.checked) failureCb.checked = false;
+  }
+  syncFailureEnabled();
+  validCb.addEventListener("change", syncFailureEnabled);
+
+  form.querySelector(".rv-save").addEventListener("click", async () => {
+    status.textContent = "saving…";
+    status.className = "rv-status";
+    try {
+      const result = await postJSON(`/api/traces/${encodeURIComponent(traceId)}/review`, {
+        scenario_id: scenarioId,
+        scenario_valid: validCb.checked,
+        confirmed_failure: failureCb.checked,
+        evidence: evidenceEl.value,
+        scenario_change: changeEl.value.trim() ? changeEl.value : null,
+      });
+      status.textContent = `saved (${result.total_reviewed} scenario(s) reviewed so far)`;
+    } catch (e) {
+      status.textContent = `failed: ${e.message}`;
+      status.className = "rv-status error";
+    }
+  });
+
+  section.appendChild(form);
+  return section;
+}
+
+// One HTTP request's worth of the conversation: the user message that
+// triggered it, the agent's internal turns, and its final reply. A session
+// with followups renders several of these, one after another, in order.
+function renderExchange(exchange, index, total) {
+  const wrap = document.createElement("div");
+  wrap.className = "exchange";
+
+  const divider = document.createElement("div");
+  divider.className = "exchange-divider";
+  const bits = total > 1 ? [`Exchange ${index + 1} of ${total}`] : [];
+  if (exchange.timestamp) bits.push(new Date(exchange.timestamp).toLocaleString());
+  const issueBadge = exchange.has_error ? ' <span class="badge error">⚠ issue</span>' : "";
+  divider.innerHTML =
+    `<span>${esc(bits.join(" · "))}</span>${issueBadge}` +
+    `<a class="permalink" href="${esc(exchange.permalink)}" target="_blank" rel="noopener">trace ↗</a>`;
+  wrap.appendChild(divider);
 
   const userCard = document.createElement("div");
   userCard.className = "message-card user";
   userCard.innerHTML = `<span class="role-label">User</span><div class="content">${
-    c.user_message ? esc(c.user_message) : missingSpan()
+    exchange.user_message ? esc(exchange.user_message) : missingSpan()
   }</div>`;
-  convo.appendChild(userCard);
+  wrap.appendChild(userCard);
 
-  if (c.turns.length === 0) {
+  if (exchange.turns.length === 0) {
     const none = document.createElement("p");
     none.className = "missing";
-    none.textContent = "no model or tool spans recorded for this trace";
-    convo.appendChild(none);
+    none.textContent = "no model or tool spans recorded for this exchange";
+    wrap.appendChild(none);
   } else {
-    for (const turn of c.turns) {
-      convo.appendChild(renderTurn(turn));
+    for (const turn of exchange.turns) {
+      wrap.appendChild(renderTurn(turn, exchange.trace_id));
     }
   }
 
   const assistantCard = document.createElement("div");
   assistantCard.className = "message-card assistant";
-  assistantCard.innerHTML = `<span class="role-label">Assistant</span><div class="content">${
-    c.assistant_reply ? esc(c.assistant_reply) : missingSpan()
-  }</div>`;
-  convo.appendChild(assistantCard);
+  assistantCard.innerHTML = `
+    <span class="role-label">Assistant <span class="notes-btn" title="Notes on this reply">📝<span class="notes-count"></span></span></span>
+    <div class="content">${exchange.assistant_reply ? esc(exchange.assistant_reply) : missingSpan()}</div>
+  `;
+  wireCardNotes(
+    assistantCard,
+    assistantCard.querySelector(".notes-count"),
+    exchange.trace_id,
+    exchange.notes,
+    "assistant reply"
+  );
+  wrap.appendChild(assistantCard);
 
-  container.appendChild(convo);
+  return wrap;
+}
 
-  // Timeline / all spans -----------------------------------------------
-  const timelineSection = document.createElement("section");
-  timelineSection.className = "block";
-  timelineSection.innerHTML = `
-    <h3>Timeline (every span in this trace)</h3>
+function renderExchangeTimeline(exchange, index, total) {
+  const section = document.createElement("div");
+  section.className = "exchange-timeline";
+  const label = total > 1 ? `Exchange ${index + 1} of ${total} — ` : "";
+  section.innerHTML = `
+    <h4>${esc(label)}every span in this exchange</h4>
     <table class="timeline-table">
       <thead>
         <tr>
@@ -447,22 +665,76 @@ function renderDetail(data) {
       <tbody></tbody>
     </table>
   `;
-  const tbody = timelineSection.querySelector("tbody");
-  for (const o of data.timeline) {
+  const tbody = section.querySelector("tbody");
+  for (const o of exchange.timeline) {
     tbody.appendChild(renderTimelineRow(o));
   }
+  return section;
+}
+
+function renderDetail(data, reviewState) {
+  const container = document.getElementById("detail-content");
+  container.innerHTML = "";
+  const entryTraceId = data.exchanges[0].trace_id;
+  const exchangeCount = data.exchanges.length;
+
+  // Header ---------------------------------------------------------------
+  const header = document.createElement("div");
+  header.className = "detail-header";
+  const statusBadge = data.has_error
+    ? '<span class="badge error">⚠ issue found</span>'
+    : '<span class="badge ok">clean</span>';
+  const idLabel = data.session_id ? `session ${data.session_id}` : entryTraceId;
+  header.innerHTML = `
+    <h2>${esc(idLabel)} ${statusBadge}</h2>
+    <div class="detail-attrs">
+      <div class="attr"><span class="field-label">Role</span>${fmtVal(data.user_role)}</div>
+      <div class="attr"><span class="field-label">User ID</span>${fmtVal(data.user_id)}</div>
+      <div class="attr"><span class="field-label">Store ID</span>${fmtVal(data.store_id)}</div>
+      <div class="attr"><span class="field-label">Prompt version</span>${fmtVal(data.prompt_version)}</div>
+      <div class="attr"><span class="field-label">Scenario ID</span>${fmtVal(data.scenario_id)}</div>
+      <div class="attr"><span class="field-label">Exchanges</span>${fmtVal(exchangeCount)}</div>
+      <div class="attr"><span class="field-label">Langfuse</span><a class="permalink" href="${esc(data.permalink)}" target="_blank" rel="noopener">open in Langfuse ↗</a></div>
+    </div>
+  `;
+  container.appendChild(header);
+
+  // Pilot review (Homework 3) ---------------------------------------------
+  container.appendChild(renderReviewForm(entryTraceId, reviewState));
+
+  // Conversation, every exchange in order ----------------------------------
+  const convo = document.createElement("section");
+  convo.className = "block";
+  convo.innerHTML = "<h3>Conversation</h3>";
+  data.exchanges.forEach((exchange, i) => {
+    convo.appendChild(renderExchange(exchange, i, exchangeCount));
+  });
+  container.appendChild(convo);
+
+  // Timeline, one table per exchange --------------------------------------
+  const timelineSection = document.createElement("section");
+  timelineSection.className = "block";
+  timelineSection.innerHTML = "<h3>Timeline</h3>";
+  data.exchanges.forEach((exchange, i) => {
+    timelineSection.appendChild(renderExchangeTimeline(exchange, i, exchangeCount));
+  });
   container.appendChild(timelineSection);
 
-  // Raw observation view --------------------------------------------------
+  // Raw observation view, one block per exchange ---------------------------
   const rawSection = document.createElement("section");
   rawSection.className = "block";
-  rawSection.innerHTML = `
-    <details class="raw-block">
-      <summary>Raw observation view (unmodified Langfuse API response)</summary>
-      <div class="field-block"><span class="field-label">Trace</span>${fmtJSON(data.raw.trace)}</div>
-      <div class="field-block"><span class="field-label">Observations (${data.raw.observations.length})</span>${fmtJSON(data.raw.observations)}</div>
-    </details>
-  `;
+  rawSection.innerHTML = "<h3>Raw observation view</h3>";
+  data.exchanges.forEach((exchange, i) => {
+    const label = exchangeCount > 1 ? `Exchange ${i + 1} of ${exchangeCount} — ` : "";
+    const details = document.createElement("details");
+    details.className = "raw-block";
+    details.innerHTML = `
+      <summary>${esc(label)}unmodified Langfuse API response</summary>
+      <div class="field-block"><span class="field-label">Trace</span>${fmtJSON(exchange.raw.trace)}</div>
+      <div class="field-block"><span class="field-label">Observations (${exchange.raw.observations.length})</span>${fmtJSON(exchange.raw.observations)}</div>
+    `;
+    rawSection.appendChild(details);
+  });
   container.appendChild(rawSection);
 }
 
@@ -549,6 +821,7 @@ function route() {
 window.addEventListener("hashchange", route);
 window.addEventListener("DOMContentLoaded", () => {
   setupListControls();
+  setupNotesModal();
   checkConnection();
   route();
 });

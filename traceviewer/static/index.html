@@ -9,7 +9,7 @@
 <body>
 
 <header class="topbar">
-  <h1>Cartwheel Trace Viewer <span class="tag">read-only</span></h1>
+  <h1>Cartwheel Trace Viewer <span class="tag">traces read-only · notes &amp; pilot review write back</span></h1>
   <div id="conn-status" class="conn-status">checking Langfuse…</div>
 </header>
 
@@ -46,8 +46,8 @@
         <th>Role</th>
         <th>User</th>
         <th>Prompt</th>
-        <th>Request</th>
-        <th>Reply</th>
+        <th>Scenario</th>
+        <th>Turns</th>
         <th>Tools</th>
         <th>Latency</th>
         <th>Cost</th>
@@ -80,6 +80,7 @@
       <span class="tool-name"></span>
       <span class="tool-latency"></span>
       <span class="tool-id"></span>
+      <button type="button" class="notes-btn" title="Notes on this span">📝<span class="notes-count"></span></button>
     </summary>
     <div class="tool-body">
       <div class="field"><span class="field-label">Observation ID</span><span class="tool-obs-id"></span></div>
@@ -111,6 +112,7 @@
       <span class="tool-name">Model call</span>
       <span class="tool-latency"></span>
       <span class="tool-id"></span>
+      <button type="button" class="notes-btn" title="Notes on this span">📝<span class="notes-count"></span></button>
     </summary>
     <div class="tool-body">
       <div class="field"><span class="field-label">Observation ID</span><span class="gen-obs-id"></span></div>
@@ -128,6 +130,21 @@
     </div>
   </details>
 </template>
+
+<div id="notes-modal" class="modal-overlay" hidden>
+  <div class="modal-box">
+    <div class="modal-header">
+      <span id="notes-modal-title">Notes</span>
+      <button type="button" id="notes-modal-close" class="modal-close" title="Close">×</button>
+    </div>
+    <div id="notes-modal-list" class="notes-list"></div>
+    <textarea id="notes-modal-textarea" placeholder="Add a note — saved to Langfuse; cannot be edited or deleted afterward"></textarea>
+    <div class="note-form-row">
+      <button type="button" id="notes-modal-save">Add note</button>
+      <span id="notes-modal-status" class="note-status"></span>
+    </div>
+  </div>
+</div>
 
 <script src="/static/app.js"></script>
 </body>

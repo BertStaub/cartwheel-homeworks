@@ -2,6 +2,24 @@
 
 Cartwheel is the support agent used throughout "Evaluating and Improving AI Agents." Students complete the starter code and use the same repository for later evaluation exercises.
 
+## Commands
+
+See README.md for setup and the full command list. To run a single test:
+`uv run pytest path/to/test_file.py -k test_name`. Homework-hole tests use
+`--runxfail` so an unfinished function fails loudly instead of silently
+xfailing (see each handout for its exact `-k` filter).
+
+## Architecture at a glance
+
+One request crosses five files before it reaches Langfuse: `server/app.py`
+authenticates the bearer token and opens the `cartwheel.session_message` root
+span; `agent/agent.py` builds the `Agent` for that role (system prompt +
+`TOOLS_BY_ROLE`); a tool call is dispatched to `agent/tools.py` (or a lecture
+tool in `agent/agent.py`), gated by the access matrix in `agent/auth.py`
+before it touches `agent/db.py`; `observability/instrument.py` then stamps
+`cartwheel.*` attributes onto the tool span OpenLLMetry already opened.
+Authorization lives in this code path, never in the prompt.
+
 ## Find the relevant instructions
 
 - Read [README.md](README.md) for setup and commands. Run commands from the repository root.

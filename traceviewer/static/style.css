@@ -119,20 +119,6 @@ button:disabled { opacity: 0.4; cursor: default; }
 .trace-table tbody tr:hover { background: var(--panel-2); }
 .trace-table td.mono, .mono { font-family: var(--mono); }
 .trace-table td.nowrap { white-space: nowrap; }
-.trace-table td.preview {
-  max-width: 320px;
-  color: var(--text-dim);
-}
-/* The clamp goes on an inner element, not the <td> itself -- overriding a
-   table cell's `display` breaks its participation in table column layout
-   and makes its content render outside its column. */
-.trace-table td.preview .preview-clamp {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 .pager { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
 .pager span { color: var(--text-dim); font-size: 13px; }
@@ -149,17 +135,6 @@ button:disabled { opacity: 0.4; cursor: default; }
 .badge.error { background: rgba(255, 107, 107, 0.15); color: var(--error); }
 .badge.unknown { background: rgba(139, 143, 152, 0.15); color: var(--missing); }
 .badge.warn { background: rgba(245, 196, 81, 0.15); color: var(--warn); }
-
-.pill {
-  display: inline-block;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 1px 8px;
-  font-size: 11px;
-  margin: 1px 3px 1px 0;
-  font-family: var(--mono);
-}
-.pill.fail { border-color: var(--error); color: var(--error); }
 
 .missing { color: var(--missing); font-style: italic; }
 
@@ -189,6 +164,30 @@ section.block > h3 {
   letter-spacing: 0.04em;
   color: var(--text-dim);
   margin: 0 0 10px;
+}
+
+/* One exchange = one HTTP request's worth of the conversation (the opening
+   message or one followup). A session with followups renders several,
+   each visually heavier than a .turn-divider so the two nesting levels
+   (exchange > turn) stay distinguishable at a glance. */
+.exchange { margin: 0 0 24px; padding-top: 12px; border-top: 2px solid var(--border); }
+.exchange:first-child { border-top: none; padding-top: 0; }
+.exchange-divider {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  padding: 4px 2px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.exchange-divider .permalink { margin-left: auto; font-weight: 500; font-size: 12px; }
+.exchange-timeline { margin-bottom: 18px; }
+.exchange-timeline h4 {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 500;
+  margin: 0 0 8px;
 }
 
 .turn { margin: 4px 0 14px; }
@@ -225,6 +224,9 @@ section.block > h3 {
 .message-card.user { border-left: 3px solid var(--accent); }
 .message-card.assistant { border-left: 3px solid var(--ok); }
 .message-card .content { white-space: pre-wrap; }
+.message-card .role-label .notes-btn { margin-left: 6px; }
+.message-card.notes-clickable { cursor: pointer; }
+.message-card.notes-clickable:hover { border-color: var(--accent); }
 
 .tool-card {
   background: var(--panel);
@@ -321,3 +323,100 @@ details.raw-block summary {
 .diff-line.remove { background: rgba(255, 107, 107, 0.12); color: var(--error); }
 .diff-line.file-header { color: var(--text-faint); }
 .diff-line.hunk-header { color: var(--accent); margin-top: 6px; }
+
+/* Notes button on each span card, and the shared notes popup ------------- */
+.notes-btn {
+  background: transparent;
+  border: none;
+  padding: 0 4px;
+  margin-left: 4px;
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.35;
+  cursor: pointer;
+}
+.notes-btn:hover { opacity: 1; border-color: transparent; }
+.notes-btn.has-notes { opacity: 1; }
+.notes-btn .notes-count {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  margin-left: 2px;
+}
+/* Tool cards put .tool-id at margin-left: auto; the notes button follows
+   it, so it stays pinned to the right end of the summary row. */
+.tool-card summary .notes-btn { margin-left: 6px; }
+
+/* A docked side panel, not a full-screen overlay -- no backdrop, so
+   whatever you're commenting on stays fully visible and readable while
+   this is open. */
+.modal-overlay {
+  position: fixed;
+  top: 76px;
+  right: 16px;
+  bottom: 16px;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  z-index: 100;
+}
+/* [hidden] alone loses to the class rule above (same specificity, author
+   stylesheet order): both set `display`, so the more specific selector
+   below has to be the one that actually hides the panel. */
+.modal-overlay[hidden] { display: none; }
+.modal-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+  padding: 16px;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 4px;
+  cursor: pointer;
+}
+.modal-close:hover { color: var(--text); border-color: transparent; }
+
+.notes-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; flex: 1 1 auto; overflow-y: auto; }
+.note-item { font-size: 13px; }
+.note-time { display: block; color: var(--text-faint); font-size: 11px; }
+.note-content { white-space: pre-wrap; }
+
+#notes-modal-textarea, .review-form textarea {
+  width: 100%;
+  min-height: 56px;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+.note-form-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.note-status, .rv-status { font-size: 12px; color: var(--text-dim); }
+.note-status.error, .rv-status.error { color: var(--error); }
+
+/* Pilot review form -------------------------------------------------------*/
+.review-block { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+.review-form .checkbox { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; margin-right: 16px; cursor: pointer; }
+.review-form .field { margin-bottom: 8px; }

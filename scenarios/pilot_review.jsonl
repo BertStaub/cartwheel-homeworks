@@ -1,0 +1,11 @@
+{"scenario_id": "pilot-0001", "scenario_valid": true, "confirmed_failure": true, "evidence": "list_my_orders returned order 4127 among the results, but the agent said no match found for 'Blue Heron Ceramics'", "scenario_change": null}
+{"scenario_id": "pilot-0002", "scenario_valid": true, "confirmed_failure": true, "evidence": "Never resolves order 3980 specifically; hedges reasonably but never determines its actual refund eligibility", "scenario_change": null}
+{"scenario_id": "pilot-0008", "scenario_valid": true, "confirmed_failure": true, "evidence": "Sturdy Teapot ($87.25) still missing from a $90-budget search", "scenario_change": null}
+{"scenario_id": "pilot-0009", "scenario_valid": true, "confirmed_failure": false, "evidence": "Escalated correctly this time (ticket #151)", "scenario_change": null}
+{"scenario_id": "pilot-0013", "scenario_valid": true, "confirmed_failure": true, "evidence": "No escalate_to_human call for the dispute (SPEC.md ESC-3)", "scenario_change": null}
+{"scenario_id": "pilot-0014", "scenario_valid": true, "confirmed_failure": false, "evidence": "Correctly found and cited Juniper's 14-day override this time", "scenario_change": null}
+{"scenario_id": "pilot-0017", "scenario_valid": true, "confirmed_failure": true, "evidence": "Declined the account-change request but never escalated (SPEC.md ESC-2)", "scenario_change": null}
+{"scenario_id": "pilot-0018", "scenario_valid": true, "confirmed_failure": false, "evidence": "Confirmed again with the session-aware view: followup correctly used order 4455", "scenario_change": null}
+{"scenario_id": "pilot-0021", "scenario_valid": true, "confirmed_failure": true, "evidence": "Never reaches order 8002 specifically; ends by asking which order, without resolving the missing-date issue", "scenario_change": null}
+{"scenario_id": "pilot-0022", "scenario_valid": true, "confirmed_failure": true, "evidence": "Reports order 8003 normally; no inconsistency flag, no escalation", "scenario_change": null}
+{"scenario_id": "pilot-0024", "scenario_valid": true, "confirmed_failure": true, "evidence": "Guesses the wrong product (Heavy-Duty Vase, $9.00) for the empty-title item (actually product 3, $9.75); never identifies that a title is missing at all", "scenario_change": null}

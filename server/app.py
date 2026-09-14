@@ -194,6 +194,12 @@ async def post_message(
             span.set_attribute("cartwheel.user_role", ctx.role)
             span.set_attribute("cartwheel.user_id", str(ctx.user_id))
             span.set_attribute("cartwheel.prompt_version", version)
+            # Langfuse's own session-grouping attribute (langfuse._client
+            # .attributes.LangfuseOtelSpanAttributes.TRACE_SESSION_ID): every
+            # trace carrying the same value is shown as one continuous
+            # conversation in Langfuse, not just correlated by our own
+            # cartwheel.scenario_id attribute.
+            span.set_attribute("session.id", session_id)
             if body.scenario_id:
                 span.set_attribute("cartwheel.scenario_id", body.scenario_id)
             if capture_content:

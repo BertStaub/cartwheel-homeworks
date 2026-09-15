@@ -146,7 +146,7 @@ Use the final 15 traces to assess whether the taxonomy has become reasonably sta
 
 ## Preparing for Homework 5
 
-Homework 5 requires at least 30 Pass labels and at least 30 Fail labels per mode before you can split and validate an LLM judge. A mode that appears in only 5 of your 100 reviewed traces will need another targeted review round in Homework 5 before you can build a judge for the mode. When you report your counts, check whether each subjective mode you plan to evaluate with an LLM judge has enough Fail examples. If a mode has fewer than 15 Fail labels after this assignment, plan to collect more labels early in Homework 5.
+Homework 5 requires at least 30 Pass labels and 30 Fail labels per mode to split and validate an LLM judge. If a mode has fewer than 30 of either, synthetically generate more scenarios targeting that mode.
 
 ## Files to commit
 

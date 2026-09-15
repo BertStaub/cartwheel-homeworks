@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Cartwheel trace review (alternate)</title>
+<style>
+  :root {
+    --user: #2563eb;
+    --assistant: #16a34a;
+    --tool: #6b7280;
+    --system: #9ca3af;
+    --border: #e5e7eb;
+    --bg-muted: #f8fafc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: #111827;
+    background: #fff;
+  }
+  #app { display: flex; height: 100vh; }
+
+  /* ---- sidebar ---- */
+  #sidebar {
+    width: 300px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  #sidebar-header {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: #374151;
+  }
+  #sidebar-header button {
+    margin-top: 6px;
+    font-size: 12px;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+  .scenario-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .scenario-item:hover { background: var(--bg-muted); }
+  .scenario-item.active { background: #eff6ff; border-left: 3px solid var(--user); }
+  .scenario-item .sid { font-weight: 600; }
+  .scenario-item .meta-line { color: #6b7280; font-size: 11px; margin-top: 2px; }
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    color: #374151;
+    margin-right: 4px;
+  }
+  .badge.challenge { background: #fee2e2; color: #991b1b; }
+  .badge.coverage { background: #dcfce7; color: #166534; }
+  .badge.notes { background: #fef9c3; color: #854d0e; }
+
+  /* ---- main ---- */
+  #main { flex: 1; overflow-y: auto; padding: 24px 32px; max-width: 900px; }
+  #status-banner {
+    padding: 10px 16px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+  #status-banner.error { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+
+  .header-block { margin-bottom: 20px; }
+  .header-block h2 { margin: 0 0 6px 0; font-size: 20px; }
+  .header-meta { font-size: 12px; color: #6b7280; display: flex; flex-wrap: wrap; gap: 10px; }
+  .header-meta a { color: var(--user); }
+
+  .expected-box {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+  .expected-box h4 { margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #0369a1; }
+  .expected-box.missing { background: var(--bg-muted); border-color: var(--border); color: #6b7280; font-style: italic; }
+
+  /* ---- conversation ---- */
+  .msg {
+    border-left: 3px solid var(--system);
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+  }
+  .msg:hover { box-shadow: 0 0 0 1px #93c5fd inset; }
+  .msg .role-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 4px;
+  }
+  .msg.role-user { border-left-color: var(--user); background: #eff6ff; }
+  .msg.role-user .role-label { color: var(--user); }
+  .msg.role-assistant { border-left-color: var(--assistant); background: #f0fdf4; }
+  .msg.role-assistant .role-label { color: var(--assistant); }
+  .msg-text { white-space: pre-wrap; font-size: 14px; line-height: 1.5; }
+
+  .tool-pair {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--tool);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    background: var(--bg-muted);
+    cursor: pointer;
+  }
+  .tool-pair:hover { box-shadow: 0 0 0 1px #93c5fd inset; }
+  .tool-pair .tool-name { font-size: 12px; font-weight: 700; color: var(--tool); margin-bottom: 6px; }
+  .tool-half { margin-bottom: 6px; }
+  .tool-half:last-child { margin-bottom: 0; }
+  .tool-half summary {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 2px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .tool-half[open] summary { margin-bottom: 4px; }
+  .tool-half pre {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 8px;
+    max-height: 220px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* ---- annotations ---- */
+  #annotation-section { margin-top: 28px; border-top: 1px solid var(--border); padding-top: 16px; }
+  #annotation-section h4 { font-size: 13px; margin: 0 0 8px 0; }
+  #annotation-section .hint { font-size: 12px; color: #6b7280; margin: 0 0 10px 0; }
+  #annotation-list { margin-bottom: 12px; }
+  .note-item {
+    background: #fef9c3;
+    border: 1px solid #fde68a;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+  .note-item .note-ts { font-size: 10px; color: #92400e; margin-top: 4px; }
+
+  /* floating annotation popover */
+  .annotation-popover {
+    position: fixed;
+    z-index: 1000;
+    width: 280px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    padding: 10px;
+    cursor: default;
+  }
+  .annotation-popover textarea {
+    width: 100%;
+    min-height: 70px;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    resize: vertical;
+  }
+  .annotation-popover-actions {
+    margin-top: 8px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .annotation-popover-actions button {
+    padding: 5px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: #f9fafb;
+  }
+  .annotation-popover-actions button.save {
+    background: var(--user);
+    color: #fff;
+    border-color: var(--user);
+  }
+
+  .empty-state { color: #6b7280; padding: 40px; text-align: center; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <div id="sidebar-summary">Loading...</div>
+      <button id="refresh-btn">Refresh from Langfuse</button>
+    </div>
+    <div id="scenario-list"></div>
+  </div>
+  <div id="main">
+    <div id="status-banner" style="display:none;"></div>
+    <div id="content" class="empty-state">Select a scenario on the left.</div>
+  </div>
+</div>
+
+<script>
+const state = { traces: [], annotations: [], selectedId: null, status: 'idle', renderedSignature: null };
+
+// A cheap fingerprint of "what would change on screen" for one trace: message
+// count and annotation count. Used to skip re-rendering the conversation pane
+// on every 3s poll -- a full re-render rebuilds every <details> element fresh
+// (closed), which was slamming shut any tool-call panel the user had just
+// opened. Only re-render when this actually changes (new messages arrived
+// while loading, or a new annotation was saved).
+function traceSignature(trace) {
+  return `${(trace.trace || []).length}:${annotationsFor(trace.trace_id).length}`;
+}
+
+async function apiGet(path) {
+  const res = await fetch(path);
+  return res.json();
+}
+async function apiPost(path, body) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body || {}),
+  });
+  return res.json();
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
+function fmtJson(value) {
+  try { return JSON.stringify(value, null, 2); } catch (e) { return String(value); }
+}
+
+function annotationsFor(traceId) {
+  return state.annotations.filter((a) => a.trace_id === traceId);
+}
+
+function renderSidebar() {
+  const summary = document.getElementById('sidebar-summary');
+  if (state.status === 'loading') {
+    summary.textContent = 'Fetching traces from Langfuse...';
+  } else if (state.status === 'error') {
+    summary.textContent = 'Fetch failed (see banner).';
+  } else {
+    summary.textContent = `${state.traces.length} scenarios`;
+  }
+
+  const list = document.getElementById('scenario-list');
+  list.innerHTML = '';
+  for (const t of state.traces) {
+    const sid = t.meta.scenario_id || t.trace_id;
+    const div = document.createElement('div');
+    div.className = 'scenario-item' + (sid === state.selectedId ? ' active' : '');
+    const noteCount = annotationsFor(t.trace_id).length;
+    const turnCount = t.features ? t.features.turn_count : undefined;
+    const toolCallCount = t.features ? t.features.tool_call_count : undefined;
+    div.innerHTML = `
+      <div class="sid">${escapeHtml(sid)}</div>
+      <div class="meta-line">
+        ${t.scenario_group ? `<span class="badge ${escapeHtml(t.scenario_group)}">${escapeHtml(t.scenario_group)}</span>` : ''}
+        ${t.meta.role ? `<span class="badge">${escapeHtml(t.meta.role)}</span>` : ''}
+        ${turnCount !== undefined ? `<span class="badge">${turnCount} turn${turnCount === 1 ? '' : 's'}</span>` : ''}
+        ${toolCallCount !== undefined ? `<span class="badge">${toolCallCount} tool call${toolCallCount === 1 ? '' : 's'}</span>` : ''}
+        ${noteCount ? `<span class="badge notes">${noteCount} note${noteCount > 1 ? 's' : ''}</span>` : ''}
+      </div>`;
+    div.addEventListener('click', () => selectScenario(sid));
+    list.appendChild(div);
+  }
+}
+
+function renderStatusBanner() {
+  const banner = document.getElementById('status-banner');
+  if (state.status === 'loading') {
+    banner.style.display = 'block';
+    banner.className = '';
+    banner.textContent = 'Fetching traces from Langfuse in the background — this can take a couple of minutes for the full store. The list on the left fills in as scenarios become available.';
+  } else if (state.status === 'error') {
+    banner.style.display = 'block';
+    banner.className = 'error';
+    banner.textContent = 'Fetch failed: ' + (state.error || 'unknown error');
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+function renderToolPair(callMsg, resultMsg) {
+  return `
+    <div class="tool-pair">
+      <div class="tool-name">🔧 ${escapeHtml(callMsg.name || 'tool')}</div>
+      <details class="tool-half">
+        <summary>arguments</summary>
+        <pre>${escapeHtml(fmtJson(callMsg.arguments))}</pre>
+      </details>
+      ${resultMsg ? `
+      <details class="tool-half">
+        <summary>result</summary>
+        <pre>${escapeHtml(fmtJson(resultMsg.content))}</pre>
+      </details>` : ''}
+    </div>`;
+}
+
+function renderMessage(msg) {
+  if (msg.role === 'user' || msg.role === 'assistant') {
+    return `
+      <div class="msg role-${msg.role}">
+        <div class="role-label">${msg.role}</div>
+        <div class="msg-text">${escapeHtml(msg.text || '')}</div>
+      </div>`;
+  }
+  // system / observation / anything else: muted, low priority
+  const text = msg.text || fmtJson(msg.content ?? msg);
+  return `
+    <div class="msg" style="opacity:0.6;">
+      <div class="role-label">${escapeHtml(msg.role || msg.label || 'note')}</div>
+      <div class="msg-text">${escapeHtml(text)}</div>
+    </div>`;
+}
+
+function renderConversation(messages) {
+  let html = '';
+  let i = 0;
+  while (i < messages.length) {
+    const m = messages[i];
+    if (m.role === 'tool_call') {
+      const next = messages[i + 1];
+      const paired = next && next.role === 'tool_result' ? next : null;
+      html += renderToolPair(m, paired);
+      i += paired ? 2 : 1;
+      continue;
+    }
+    if (m.role === 'tool_result') {
+      // an orphaned result with no preceding call (rare); show it alone
+      html += renderToolPair({ name: m.name, arguments: null }, m);
+      i += 1;
+      continue;
+    }
+    html += renderMessage(m);
+    i += 1;
+  }
+  return html || '<div class="empty-state">No conversation content on this trace.</div>';
+}
+
+function renderExpected(trace) {
+  const expected = trace.expected;
+  if (!expected) {
+    return `<div class="expected-box missing">No expected outcome found for scenario "${escapeHtml(trace.meta.scenario_id || '')}" in the scenario files.</div>`;
+  }
+  const rows = [];
+  if (expected.evaluation) rows.push(`<b>evaluation:</b> ${escapeHtml(expected.evaluation)}`);
+  if (expected.outcome) rows.push(`<b>outcome:</b> ${escapeHtml(expected.outcome)}`);
+  if (expected.criterion) rows.push(`<b>criterion:</b> ${escapeHtml(expected.criterion)}`);
+  if (expected.reason) rows.push(`<b>reason:</b> ${escapeHtml(expected.reason)}`);
+  if (expected.source) rows.push(`<b>source:</b> ${escapeHtml(fmtJson(expected.source))}`);
+  return `<div class="expected-box"><h4>Expected outcome</h4>${rows.join('<br/>')}</div>`;
+}
+
+function renderContent(trace) {
+  // innerHTML swaps only replace children, not the element's own attributes,
+  // so the initial placeholder's "empty-state" class (text-align: center)
+  // would otherwise stick around forever and center every child inside it.
+  document.getElementById('content').className = '';
+  state.renderedSignature = traceSignature(trace);
+
+  const sid = trace.meta.scenario_id || trace.trace_id;
+  const metaBits = [];
+  if (trace.meta.role) metaBits.push(`role: ${escapeHtml(trace.meta.role)}`);
+  if (trace.meta.store) metaBits.push(`store: ${escapeHtml(trace.meta.store)}`);
+  if (trace.meta.prompt_version) metaBits.push(`prompt: ${escapeHtml(trace.meta.prompt_version)}`);
+  if (trace.tuple && trace.tuple.intent) metaBits.push(`intent: ${escapeHtml(trace.tuple.intent)}`);
+  if (trace.tuple && trace.tuple.difficulty) metaBits.push(`difficulty: ${escapeHtml(trace.tuple.difficulty)}`);
+  metaBits.push(`trace: <a href="${trace.trace_permalink}" target="_blank">${trace.trace_id.slice(0, 12)}…</a>`);
+  if (trace.session_permalink) {
+    metaBits.push(`session: <a href="${trace.session_permalink}" target="_blank">${trace.session_id.slice(0, 12)}…</a>`);
+  }
+
+  const notes = annotationsFor(trace.trace_id);
+  const notesHtml = notes.length
+    ? notes.map((n) => `
+        <div class="note-item">
+          ${escapeHtml(n.note)}
+          <div class="note-ts">${escapeHtml(n.ts)}</div>
+        </div>`).join('')
+    : '<div class="empty-state" style="padding:12px;">No annotations yet.</div>';
+
+  document.getElementById('content').innerHTML = `
+    <div class="header-block">
+      <h2>${escapeHtml(sid)}</h2>
+      <div class="header-meta">${metaBits.join(' &middot; ')}</div>
+    </div>
+    ${renderExpected(trace)}
+    <div id="conversation">${renderConversation(trace.trace || [])}</div>
+    <div id="annotation-section">
+      <h4>Annotations</h4>
+      <p class="hint">Click a message or tool call to add a note.</p>
+      <div id="annotation-list">${notesHtml}</div>
+    </div>
+  `;
+
+  // Click-to-annotate: clicking a message or tool-call block opens a floating
+  // popover near the click. Excludes <summary> so the JSON expand/collapse
+  // toggle still works untouched.
+  document.getElementById('conversation').addEventListener('click', (event) => {
+    if (event.target.closest('summary')) return;
+    const block = event.target.closest('.msg, .tool-pair');
+    if (block) openAnnotationPopover(event.clientX, event.clientY, trace);
+  });
+}
+
+async function refreshAnnotationList(trace) {
+  state.annotations = (await apiGet('/api/annotations')).annotations || [];
+  const notes = annotationsFor(trace.trace_id);
+  const list = document.getElementById('annotation-list');
+  if (list) {
+    list.innerHTML = notes.length
+      ? notes.map((n) => `
+          <div class="note-item">
+            ${escapeHtml(n.note)}
+            <div class="note-ts">${escapeHtml(n.ts)}</div>
+          </div>`).join('')
+      : '<div class="empty-state" style="padding:12px;">No annotations yet.</div>';
+  }
+  // Keep the poll-signature in sync so the periodic poll does not also
+  // re-render the whole pane (and reset every open <details>) right after.
+  state.renderedSignature = traceSignature(trace);
+  renderSidebar();
+}
+
+function closeAnnotationPopover() {
+  document.getElementById('annotation-popover')?.remove();
+  document.removeEventListener('keydown', popoverEscapeHandler);
+  document.removeEventListener('click', popoverOutsideClickHandler);
+}
+
+function popoverEscapeHandler(event) {
+  if (event.key === 'Escape') closeAnnotationPopover();
+}
+
+function popoverOutsideClickHandler(event) {
+  const popover = document.getElementById('annotation-popover');
+  if (popover && !popover.contains(event.target)) closeAnnotationPopover();
+}
+
+function openAnnotationPopover(clientX, clientY, trace) {
+  closeAnnotationPopover();
+
+  const popover = document.createElement('div');
+  popover.id = 'annotation-popover';
+  popover.className = 'annotation-popover';
+  popover.innerHTML = `
+    <textarea placeholder="Write a note about this trace..."></textarea>
+    <div class="annotation-popover-actions">
+      <button class="cancel">Cancel</button>
+      <button class="save">Save</button>
+    </div>`;
+  document.body.appendChild(popover);
+
+  // Position near the click, then clamp so it never renders off-screen.
+  const margin = 8;
+  let left = clientX;
+  let top = clientY;
+  const rect = popover.getBoundingClientRect();
+  left = Math.min(left, window.innerWidth - rect.width - margin);
+  top = Math.min(top, window.innerHeight - rect.height - margin);
+  left = Math.max(margin, left);
+  top = Math.max(margin, top);
+  popover.style.left = `${left}px`;
+  popover.style.top = `${top}px`;
+
+  const textarea = popover.querySelector('textarea');
+  textarea.focus();
+
+  popover.querySelector('.cancel').addEventListener('click', closeAnnotationPopover);
+  popover.querySelector('.save').addEventListener('click', async () => {
+    const note = textarea.value.trim();
+    if (!note) return;
+    await apiPost('/api/annotations', {
+      trace_id: trace.trace_id,
+      note,
+      session_id: trace.session_id,
+    });
+    closeAnnotationPopover();
+    await refreshAnnotationList(trace);
+  });
+
+  document.addEventListener('keydown', popoverEscapeHandler);
+  // Attach on the next tick so the click that opened this popover (already
+  // mid-dispatch) does not immediately count as an "outside" click.
+  setTimeout(() => document.addEventListener('click', popoverOutsideClickHandler), 0);
+}
+
+function selectScenario(sid) {
+  state.selectedId = sid;
+  const trace = state.traces.find((t) => (t.meta.scenario_id || t.trace_id) === sid);
+  renderSidebar();
+  if (trace) renderContent(trace);
+}
+
+async function poll() {
+  const [tracesResp, annotationsResp] = await Promise.all([
+    apiGet('/api/traces'),
+    apiGet('/api/annotations'),
+  ]);
+  state.status = tracesResp.status;
+  state.error = tracesResp.error;
+  state.traces = tracesResp.traces || [];
+  state.annotations = annotationsResp.annotations || [];
+  renderStatusBanner();
+  renderSidebar();
+  if (state.selectedId) {
+    const trace = state.traces.find((t) => (t.meta.scenario_id || t.trace_id) === state.selectedId);
+    if (trace && traceSignature(trace) !== state.renderedSignature) renderContent(trace);
+  }
+}
+
+document.getElementById('refresh-btn').addEventListener('click', async () => {
+  await apiPost('/api/refresh', {});
+  poll();
+});
+
+poll();
+setInterval(poll, 3000);
+</script>
+</body>
+</html>

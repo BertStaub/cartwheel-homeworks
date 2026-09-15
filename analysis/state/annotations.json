@@ -1,1 +1,24 @@
-{"annotations": []}
+{
+  "annotations": [
+    {
+      "id": "23da0f8e35844d019bc586c50ff9c3f5",
+      "trace_id": "d8d85a66fd5471b7aa51b6f9f87d217d",
+      "quote": null,
+      "start": null,
+      "end": null,
+      "note": "stuff here",
+      "ts": "2026-09-15T16:59:14.826343+00:00",
+      "session_id": "e274a41d45aa44f28fae598c280f1668"
+    },
+    {
+      "id": "11810a15d41d4d769e0b58409a24853e",
+      "trace_id": "d8d85a66fd5471b7aa51b6f9f87d217d",
+      "quote": null,
+      "start": null,
+      "end": null,
+      "note": "more stuff",
+      "ts": "2026-09-15T16:59:34.090647+00:00",
+      "session_id": "e274a41d45aa44f28fae598c280f1668"
+    }
+  ]
+}

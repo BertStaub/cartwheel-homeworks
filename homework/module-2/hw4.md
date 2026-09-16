@@ -16,7 +16,7 @@ This provides 100 scenarios, their results, and the trace export. If you complet
 
 If you would like a coding agent to walk you through the assignment, paste the prompt below at the start of a session in your repository.
 
-> Cartwheel is a fictional e-commerce support agent built for educational purposes. Walk me through Homework 4 in `homework/module-2/hw4.md`. Read `AGENTS.md`, the handout, `SPEC.md`, and `analysis/skill/SKILL.md` first. Work one step at a time in the handout's order. Do not run commands, change files, or generate anything without my explicit approval. Before each step, explain what you propose and why, then wait for me to say go. Make sure I understand each concept before moving on. Explain error analysis concepts (open coding, axial coding, failure modes) in depth; treat infrastructure as a checklist. Leave the video to me.
+> Cartwheel is a fictional e-commerce support agent built for educational purposes. Walk me through Homework 4 in `homework/module-2/hw4.md`. Read `AGENTS.md`, the handout, `SPEC.md`, and the [error-discovery](https://github.com/ai-evals-course/evals-skills/blob/main/skills/error-discovery/SKILL.md) skill on GitHub first. Work one step at a time in the handout's order. Do not run commands, change files, or generate anything without my explicit approval. Before each step, explain what you propose and why, then wait for me to say go. Make sure I understand each concept before moving on. Explain error analysis concepts (open coding, axial coding, failure modes) in depth; treat infrastructure as a checklist. Leave the video to me.
 
 ## Expected work
 
@@ -45,7 +45,7 @@ You will review live traces in Langfuse and commit a local copy of your analysis
 
 Confirm your Langfuse project contains the Cartwheel support traces from Module 1. Then read:
 
-- `cartwheel/analysis/skill/SKILL.md`.
+- The [error-discovery](https://github.com/ai-evals-course/evals-skills/blob/main/skills/error-discovery/SKILL.md) skill on GitHub.
 - `cartwheel/SPEC.md`.
 - `cartwheel/analysis/server.py`.
 - `cartwheel/analysis/ui/index.html`, which is a supplied reference rather than the required submission.
@@ -58,7 +58,7 @@ You will review 5 to 10 traces in the standard Langfuse annotation view, then us
 
 Next, ask your AI coding agent to read the error analysis skill and the Workshop notes. Require the coding agent to compare the preliminary Workshop runs with several Langfuse traces, then propose a visual organization before writing code. You may begin with the following prompt:
 
-> Read `analysis/skill/SKILL.md`. Inspect 5 to 10 traces from my Langfuse project. Describe the trace fields and the visual organization you propose for human review. Do not write the interface until I approve the proposal. Use `analysis/ui/index.html` and `analysis/server.py` as implementation references, but adapt the interface to the trace structure you observe.
+> Read the [error-discovery](https://github.com/ai-evals-course/evals-skills/blob/main/skills/error-discovery/SKILL.md) skill on GitHub. Inspect 5 to 10 traces from my Langfuse project. Describe the trace fields and the visual organization you propose for human review. Do not write the interface until I approve the proposal. Use `analysis/ui/index.html` and `analysis/server.py` as implementation references, but adapt the interface to the trace structure you observe.
 
 After you approve the proposal, ask the coding agent to build the interface under `analysis/review_app/`. Cartwheel creates one Langfuse trace per user turn, so a multi-turn conversation produces several traces. The interface must group traces by `cartwheel.session_id` and display each conversation in chronological order, otherwise a followup turn appears in isolation and the reviewer cannot see the tool calls from the earlier turn. The interface must provide:
 
@@ -191,7 +191,7 @@ Explain:
 
 ## References
 
-- [Error analysis skill](../../../cartwheel/analysis/skill/SKILL.md)
+- [error-discovery](https://github.com/ai-evals-course/evals-skills/blob/main/skills/error-discovery/SKILL.md)
 - [Raindrop Workshop](https://github.com/raindrop-ai/workshop)
 - [Langfuse annotation queues](https://langfuse.com/docs/evaluation/evaluation-methods/annotation-queues)
 - [AgentDebug failure taxonomy](https://arxiv.org/abs/2509.25370)

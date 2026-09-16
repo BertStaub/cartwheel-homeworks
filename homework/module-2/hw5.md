@@ -38,13 +38,9 @@ Choose a failure mode from Homework 4 that is suitable for an LLM judge. For exa
 
 ### Failure definition
 
-Decide exactly what you will label as a failure. State your question, Pass and Fail rules, and the evidence you need. Identify a nearby issue that you will exclude.
+Decide exactly what you will label as a failure. State your question, Pass and Fail rules, and the evidence you need.
 
-Use [SPEC.md](../../SPEC.md) to check what you expect from the Cartwheel agent. For example, under `RESP-2`, you should not claim a completed refund before confirmation from the refund tool. To label a particular reply, compare the reply with the actual tool result.
-
-For policy questions, use the applicable help center passage. Under `RESP-1`, you also need a policy identifier in the reply. Distinguish a missing citation from an unsupported policy claim. Do not combine both issues unless you deliberately define a broader criterion.
-
-Do not accept a claim merely because you found it in the system prompt. You may have found a prompt error. If you want behavior beyond the current specification, write down the new expectation before labeling cases.
+Refer to [SPEC.md](../../SPEC.md) for the intended Cartwheel behavior.
 
 ### Experiment notes
 
@@ -60,7 +56,6 @@ For example, suppose you choose unsupported policy claims. You could start with 
 | Fail | You have at least one policy claim with no support, or a contradiction with the policy. |
 | Pass example | You have a 30-day return window in both the policy and the reply. |
 | Fail example | You have a 30-day window in the policy, but a 90-day window in the reply. |
-| Excluded issue | You have a wrong order total in the reply. Judge that as an order fact error, not a policy error. |
 | Evidence | Review the final reply and applicable policy passages. |
 
 Use actual trace identifiers for your own examples. Keep the full traces in your saved data.
@@ -305,7 +300,7 @@ Keep your Homework 4 files too.
 
 Record your screen for up to 5 minutes in one continuous take. Demonstrate your work and explain:
 
-- Your failure mode and one neighboring issue you excluded.
+- Your failure mode.
 - One development disagreement and your response.
 - Your test TPR, TNR, and confidence intervals. Explain whether you would use the judge and why.
 

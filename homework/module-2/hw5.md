@@ -34,9 +34,7 @@ Run commands from the Cartwheel repository root. Install Python dependencies, in
 
 ## Part A, choose one failure mode
 
-Choose a mode from Homework 4. Choose one where you need human interpretation. For example, you could judge whether you have policy evidence for a claim.
-
-Use a code check for a direct comparison of structured values. For example, you do not need an LLM to compare two order totals.
+Choose a failure mode from Homework 4 that is suitable for an LLM judge. For example, you could judge whether the final reply has enough information for the user's next decision, without unnecessary detail.
 
 ### Failure definition
 

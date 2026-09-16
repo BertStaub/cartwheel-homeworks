@@ -28,6 +28,8 @@ This skill runs one discovery loop twice: once to find and name failures, once t
 - **First half (discovery), phases 1 to 5.** Inventory the trace store, design the visual encoding, build a single file review interface over Langfuse, cluster and select a diverse batch, and run the live annotation loop. The supplied server and interface are implementation references, not the student's completed interface. The live session instructions are in [review-loop.md](review-loop.md).
 - **Second half (measurement), phases 6 to 11.** From the axial taxonomy, draft one judge prompt per selected subjective mode, collect enough human judgments, split the judgments, refine on development data, freeze the evaluator, test it once, use DocETL to apply it to the defined trace population, and compute corrected prevalence directly in Python.
 
+For Homework 5, use the current handout with the course `write-judge-prompt` and `validate-evaluator` skills. Use the older measurement phases below only as background. Follow the handout for workload, label counts, and metric calculations.
+
 Read this whole file first so you understand the shape before you start. Do the first half using phases 1 to 5 and [review-loop.md](review-loop.md). When the human is ready to measure, do the second half using phases 6 to 11.
 
 ## The loop is a cycle, not a pipeline
@@ -241,7 +243,7 @@ For each subjective mode, draft a judge prompt from the mode's definition and it
 1. A single, narrowly scoped task (one mode, one binary question).
 2. Precise definitions of pass and fail, written from the axial-coding definition.
 3. Few-shot examples of both classes, drawn from the training split only.
-4. A structured output format with `passes_mode` and a short `evidence` field.
+4. A structured output format with `critique` followed by a `result` of `Pass` or `Fail`.
 
 Decide what the judge receives. This is a design choice, not "give it the whole trace." For a groundedness mode like `unsupported_policy_claim`, give the judge the agent's final message plus the policy docs it cited, not the whole trace, because the question is "is the claim supported by the cited docs" and extra context invites the judge to excuse the claim from its own world knowledge. Tell the judge to use only the provided documents, not its own knowledge.
 
@@ -255,10 +257,10 @@ The default judge model for the demo is a different family from the agent under 
 
 A judge is validated against held out human judgments, so each selected mode needs enough Pass and Fail examples. Homework 4 already provides at least 100 decisions per mode because the human applies every final mode to every reviewed trace. Failures may be rare, so additional retrieval is often necessary.
 
-- Retrieve additional cases with `next_to_label(mode, k, strategy)`. Strategies include semantic neighbors of confirmed failures, disagreement cases, and random traces. The helper returns candidate identifiers with the signal responsible for selection. The human judges every candidate. Each mode needs at least 100 decisions, including at least 30 Pass and 30 Fail decisions.
-- Split with `split_labels(mode, fractions, seed, min_per_class)`. Default fractions are 0.15 train, 0.425 development, and 0.425 test. The course default requires at least 10 examples of each class in development and test, which provides preliminary educational evidence rather than a production guarantee. The helper persists the assignment to `state/splits.json` and refuses a class count too small for the requested minimum. Any trace appearing in the prompt is excluded from development and test.
+- Retrieve additional cases with `next_to_label(mode, k, strategy)`. Strategies include semantic neighbors of confirmed failures, disagreement cases, and random traces. The helper returns candidate identifiers with the signal responsible for selection. The human judges every candidate. For Homework 5, reuse your Homework 4 decisions. Collect at least 30 Pass and 30 Fail labels from independent conversations. Use your coding agent to search for candidates or generate targeted scenarios. Review the resulting traces yourself. If you cannot find enough cases, follow the handout's Stop early instructions.
+- Split with `split_labels(mode, fractions, seed, min_per_class)`. The helper retains default fractions of 0.15 train, 0.425 development, and 0.425 test for compatibility. Homework 5 explicitly passes 0.20, 0.40, and 0.40. Its eligible identifier list excludes related, incomplete, and out of scope records without deleting label history. The course default requires at least 10 examples of each class in development and test, which provides preliminary educational evidence rather than a production guarantee. The helper persists the assignment to `state/splits.json` and refuses a class count too small for the requested minimum. Any trace appearing in the prompt is excluded from development and test.
 
-Class balance beats realism in dev and test: aim for 30 or more of each class in each of dev and test, even though failures are rare in the wild. At course scale you may land below that ideal (for example 12 failures per split), which is a deliberate compromise that widens the confidence interval. At work with more traffic, push toward 30 or more per class.
+The class counts control how precisely TPR and TNR can be measured. Small counts produce wide intervals, and no single minimum establishes reliability. Do not extend Homework 5 collection indefinitely to meet a larger sample target.
 
 ## Phase 9: The judge-building loop is iterative
 
@@ -268,7 +270,7 @@ Building a judge is not draft-then-done. It is a cycle: draft, validate against 
 - Score alignment with `judge_alignment(judge_id, split)`, which returns TPR, TNR, overall agreement, the confusion counts, and the disagreement trace ids, and auto-appends a row to the iteration log when run on dev. Read TPR and TNR, never overall agreement alone (phase notes below on why).
 - Read every disagreement with the human labels. Propose a prompt edit from the disagreement patterns: clarify a definition, or swap or add a few-shot example. The human decides each edit. Register the edit as a new version with `register_judge`, rerun, and score again.
 - Disagreement review cuts both ways. Sometimes the judge is wrong. Sometimes re-reading changes the human's mind and the human flips their own label. You never flip a label yourself. Label flips are logged, and the numbers are recomputed when they happen. Inspect the running table any time with `iteration_log(judge_id)`, which shows version, change note, dev TPR, dev TNR, and label flips.
-- Stop when the development evidence meets the minimum TPR and TNR chosen for the intended use, or when two consecutive revisions do not address a general disagreement pattern. The course does not impose one accuracy threshold across uses.
+- For Homework 5, run a baseline and at most two revisions. Compute TPR, TNR, and confidence intervals. Use the rates, uncertainty, and disagreements to explain whether you would use the judge. Do not require numerical acceptance targets.
 
 **Why overall agreement is inadequate.** When failures are rare, overall agreement is dominated by the majority class. If a mode appears in 7 of 100 traces, a judge returning Pass for every trace has 93 percent agreement and a TNR of zero. Report TPR for Pass and TNR for Fail as a pair.
 
@@ -276,9 +278,9 @@ Building a judge is not draft-then-done. It is a cycle: draft, validate against 
 
 ## Phase 10: Freeze, then test once
 
-When the human approves the stopping point, freeze the prompt with `freeze_judge(judge_id)`. Freezing is what unlocks the test split, so the test set cannot be touched before the judge is frozen. This is enforced in code: `judge_alignment` on `test` raises unless the judge is frozen, and `freeze_judge` is one-way per version. Fixing a frozen judge means registering a new version, which re-locks the test set.
+Before the first prompt run, preserve exact judge inputs in a local export and set `CARTWHEEL_JUDGE_TRACE_SOURCE` to the export. The helper checks the export hash on resume. When the human approves the stopping point, freeze the prompt with `freeze_judge(judge_id)`. Freezing is what unlocks the test split, so the test set cannot be touched before the judge is frozen. Both `run_judge` and `judge_alignment` protect the test set, and `freeze_judge` is one-way per version. The frozen record preserves the test identifiers and human labels. Fixing a frozen judge means registering a new version, which re-locks the test set.
 
-Run the test set once with `run_judge(judge_id, "test")` and `judge_alignment(judge_id, "test")`, and report the test TPR and TNR as the final measured rates. The demonstration reaches 0.95 Pass TPR and 0.91 Fail TNR on development, followed by 0.95 Pass TPR and 0.83 Fail TNR on test. The lower test TNR shows why the correction must use the held out result.
+Run the test set with `run_judge(judge_id, "test")` and `judge_alignment(judge_id, "test")`, and report the final test rates. An interrupted run may resume with the same judge id, model, prompt, input export, labels, and split. Completed batches are saved; only missing predictions run again. An interrupted unsaved batch may incur repeat calls. Do not register, split, or freeze again to resume. Recomputing metrics from saved predictions is allowed. The demonstration reaches 0.95 Pass TPR and 0.91 Fail TNR on development, followed by 0.95 Pass TPR and 0.83 Fail TNR on test. The lower test TNR shows why the correction must use the held out result.
 
 ## Phase 11: Correct to true prevalence, set the accuracy bar, and report
 
@@ -297,7 +299,7 @@ The report is the handoff to Module 3. Its modes become regression dimensions, a
 
 ## Batch execution with DocETL
 
-Use the same DocETL map operation for development, held-out test, and subsequent unlabeled batches. The operation receives only the trace fields required by the failure-mode definition, and its output schema contains the binary label and evidence string. DocETL parallelizes the model calls and caches repeated work. The skill additionally records predictions by prompt hash and trace identifier, so editing a prompt creates a new evaluator version without obscuring earlier results.
+Use the same DocETL map operation for development, held-out test, and subsequent unlabeled batches. The operation receives only the trace fields required by the failure-mode definition, and its output schema contains the critique and Pass/Fail verdict. DocETL parallelizes the model calls and caches repeated work. The skill additionally records predictions by prompt hash and trace identifier, so editing a prompt creates a new evaluator version without obscuring earlier results.
 
 Do not substitute a cheaper model only for the unlabeled batch. A model change creates a different judge with different error rates, so it requires its own development and held-out validation. Cost and accuracy optimization across several evaluator models belongs in the later optimization workflow.
 
@@ -305,7 +307,7 @@ Do not substitute a cheaper model only for the unlabeled batch. A model change c
 
 These are enforced in the helpers, and they teach the method by refusing to break it. Do not try to work around them. If one blocks you, it is telling you a step is out of order.
 
-- `judge_alignment` on `test` raises unless the judge is frozen. You cannot peek at the test set during refinement.
+- `run_judge` and `judge_alignment` protect the test set until the judge is frozen. Frozen test identifiers and labels cannot change during a resume.
 - `freeze_judge` is one-way per version. Fixing a frozen judge means a new version, which re-locks the test set.
 - `split_labels` refuses thin classes instead of silently producing unstable estimates.
 - Label edits append rather than overwrite (a flip sets `superseded_by` on the old line and adds a new one), so the flip history in `iteration_log` is complete and nothing is lost.

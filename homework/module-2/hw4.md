@@ -2,11 +2,21 @@
 
 Homework 4 asks you to read Cartwheel traces, find the failures, and organize the failures into 5 to 8 named categories. You review at least 100 traces, describe each failure in your own words, then group similar failures together.
 
+## Preparation
+
+Homework 4 uses the traces from Homework 3. If you did not complete Homework 3, apply the reference trace bundle:
+
+```bash
+git apply homework/module-2/hw3-reference.patch
+```
+
+This provides 100 scenarios, their results, and the trace export. If you completed Homework 3, use your own traces.
+
 ## Working through the assignment with a coding agent
 
-If you would like a coding agent to walk you through the assignment, paste the prompt below at the start of a session in your repository. The agent builds the review interface with the error-analysis skill; the handout's review points are where you decide.
+If you would like a coding agent to walk you through the assignment, paste the prompt below at the start of a session in your repository.
 
-> Walk me through Homework 4 in `homework/module-2/hw4.md`. Read `AGENTS.md`, the handout, `SPEC.md`, and `analysis/skill/SKILL.md` first. Work one step at a time in the handout's order. Wait for my go before running commands or changing files. Explain error analysis concepts (open coding, axial coding, failure modes) in depth; treat infrastructure as a checklist. Leave the video to me.
+> Cartwheel is a fictional e-commerce support agent built for educational purposes. Walk me through Homework 4 in `homework/module-2/hw4.md`. Read `AGENTS.md`, the handout, `SPEC.md`, and `analysis/skill/SKILL.md` first. Work one step at a time in the handout's order. Do not run commands, change files, or generate anything without my explicit approval. Before each step, explain what you propose and why, then wait for me to say go. Make sure I understand each concept before moving on. Explain error analysis concepts (open coding, axial coding, failure modes) in depth; treat infrastructure as a checklist. Leave the video to me.
 
 ## Expected work
 
@@ -146,7 +156,7 @@ Use the final 15 traces to assess whether the taxonomy has become reasonably sta
 
 ## Preparing for Homework 5
 
-Homework 5 requires at least 30 Pass labels and at least 30 Fail labels per mode before you can split and validate an LLM judge. A mode that appears in only 5 of your 100 reviewed traces will need another targeted review round in Homework 5 before you can build a judge for the mode. When you report your counts, check whether each subjective mode you plan to evaluate with an LLM judge has enough Fail examples. If a mode has fewer than 15 Fail labels after this assignment, plan to collect more labels early in Homework 5.
+Homework 5 requires at least 30 Pass labels and 30 Fail labels per mode to split and validate an LLM judge. If a mode has fewer than 30 of either, synthetically generate more scenarios targeting that mode.
 
 ## Files to commit
 
@@ -178,8 +188,6 @@ Explain:
 - One rejected search suggestion and the boundary excluding it.
 - One relationship between a mode and `SPEC.md`.
 - The number of new modes found in the final 15 reviewed traces.
-
-Open one trace and its saved Langfuse score during the recording. Regenerate one reviewed sample count from the committed label files. Make sure every numerical claim agrees with the committed artifacts.
 
 ## References
 

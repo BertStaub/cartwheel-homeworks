@@ -66,16 +66,32 @@
   .badge.notes { background: #fef9c3; color: #854d0e; }
 
   /* ---- main ---- */
-  #main { flex: 1; overflow-y: auto; padding: 24px 32px; max-width: 900px; }
+  /* No padding here anymore -- #sticky-header and #scroll-body carry their
+     own padding instead, so the header can be position: sticky against
+     #main's own scrollport without the container's padding pushing it
+     around. */
+  #main { flex: 1; overflow-y: auto; max-width: 900px; }
   #status-banner {
     padding: 10px 16px;
     background: #fffbeb;
     border: 1px solid #fde68a;
     border-radius: 6px;
-    margin-bottom: 16px;
+    margin: 24px 32px 0;
     font-size: 13px;
   }
   #status-banner.error { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+
+  /* Scenario name through the expected outcome: stays pinned to the top of
+     #main while the conversation below it scrolls. */
+  #sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #fff;
+    padding: 24px 32px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  #scroll-body { padding: 16px 32px 24px; }
 
   .header-block { margin-bottom: 20px; }
   .header-block h2 { margin: 0 0 6px 0; font-size: 20px; }
@@ -87,7 +103,6 @@
     border: 1px solid #bae6fd;
     border-radius: 8px;
     padding: 12px 16px;
-    margin-bottom: 20px;
     font-size: 13px;
   }
   .expected-box h4 { margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #0369a1; }
@@ -460,16 +475,20 @@ function renderContent(trace) {
   const notesHtml = renderNotesHtml(annotationsFor(trace.trace_id));
 
   document.getElementById('content').innerHTML = `
-    <div class="header-block">
-      <h2>${escapeHtml(sid)}</h2>
-      <div class="header-meta">${metaBits.join(' &middot; ')}</div>
+    <div id="sticky-header">
+      <div class="header-block">
+        <h2>${escapeHtml(sid)}</h2>
+        <div class="header-meta">${metaBits.join(' &middot; ')}</div>
+      </div>
+      ${renderExpected(trace)}
     </div>
-    ${renderExpected(trace)}
-    <div id="conversation">${renderConversation(trace.trace || [], trace.trace_id)}</div>
-    <div id="annotation-section">
-      <h4>Annotations</h4>
-      <p class="hint">Click a message or tool call to add a note about that specific item.</p>
-      <div id="annotation-list">${notesHtml}</div>
+    <div id="scroll-body">
+      <div id="conversation">${renderConversation(trace.trace || [], trace.trace_id)}</div>
+      <div id="annotation-section">
+        <h4>Annotations</h4>
+        <p class="hint">Click a message or tool call to add a note about that specific item.</p>
+        <div id="annotation-list">${notesHtml}</div>
+      </div>
     </div>
   `;
 

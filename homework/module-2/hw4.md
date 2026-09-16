@@ -1,7 +1,5 @@
 # Homework 4, human trace review and failure taxonomy
 
-> Cartwheel is a fictional e-commerce platform used for educational purposes in this course. All data is synthetic.
-
 Homework 4 asks you to read Cartwheel traces, find the failures, and organize the failures into 5 to 8 named categories. You review at least 100 traces, describe each failure in your own words, then group similar failures together.
 
 ## Preparation
@@ -190,8 +188,6 @@ Explain:
 - One rejected search suggestion and the boundary excluding it.
 - One relationship between a mode and `SPEC.md`.
 - The number of new modes found in the final 15 reviewed traces.
-
-Open one trace and its saved Langfuse score during the recording. Regenerate one reviewed sample count from the committed label files. Make sure every numerical claim agrees with the committed artifacts.
 
 ## References
 

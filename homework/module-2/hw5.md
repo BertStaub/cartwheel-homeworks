@@ -8,7 +8,7 @@ Submit your judge prompt, labels, and evaluation results. In a **video of up to 
 
 Paste the following prompt once. Continue in the same conversation for Parts A through E.
 
-> Guide me through Homework 5 in `homework/module-2/hw5.md`, one part at a time. Read `AGENTS.md`, the handout, and `SPEC.md`. Use `write-judge-prompt` and `validate-evaluator`. Help me install them if needed. First help me choose a failure mode and check its boundary. Reuse my Homework 4 interface and labels. Use `validate-evaluator` to split the labels before choosing prompt examples. Use `write-judge-prompt` for the draft, with training examples only. Return to `validate-evaluator` for development review and the final test. Explain each step before we start. Compute TPR, TNR, and confidence intervals. Do not require minimum scores. Follow the handout if the skills differ on label counts or evaluation requirements. Use the Cartwheel helpers for DocETL batches and statistics. Save my experiment notes and results as we go. Leave labels and final decisions to me. Before a paid batch, show me the model and trace count. Wait for my approval. Do not show me test predictions before I freeze the judge. Leave the video to me.
+> Guide me through Homework 5 in `homework/module-2/hw5.md`, one part at a time. Read `AGENTS.md`, the handout, and `SPEC.md`. Use `write-judge-prompt` and `validate-evaluator`. Help me install them if needed. First help me choose a failure mode and check its boundary. Reuse my Homework 4 interface and labels. Use `validate-evaluator` to split the labels before choosing prompt examples. Use `write-judge-prompt` for the draft, with training examples only. Return to `validate-evaluator` for development review and the final test. Explain each step before we start. Compute TPR, TNR, and confidence intervals. Do not require minimum scores. Follow the handout if the skills differ on label counts or evaluation requirements. Use the Cartwheel helpers for DocETL batches and statistics. Save my prompts, labels, and evaluation results as we go. Leave labels and final decisions to me. Before a paid batch, show me the model and trace count. Wait for my approval. Do not show me test predictions before I freeze the judge. Leave the video to me.
 
 ## Skills
 
@@ -41,37 +41,6 @@ Choose a failure mode from Homework 4 that is suitable for an LLM judge. For exa
 Decide exactly what you will label as a failure. State your question, Pass and Fail rules, and the evidence you need.
 
 Refer to [SPEC.md](../../SPEC.md) for the intended Cartwheel behavior.
-
-### Experiment notes
-
-Save your decisions in `analysis/report/hw5.md`. Start with your failure definition. Add brief notes on your metrics, prompt edits, and final decision as you work.
-
-For example, suppose you choose unsupported policy claims. You could start with the following notes. The 30-day window is hypothetical.
-
-| Note | Example |
-| --- | --- |
-| Question | Can you justify each policy claim in the reply using the applicable help center passages? |
-| Expected behavior | Under `SCOPE-1`, answer policy questions from the help center. Do not invent extra rules. |
-| Pass | You have support for every policy claim in the reply. |
-| Fail | You have at least one policy claim with no support, or a contradiction with the policy. |
-| Pass example | You have a 30-day return window in both the policy and the reply. |
-| Fail example | You have a 30-day window in the policy, but a 90-day window in the reply. |
-| Evidence | Review the final reply and applicable policy passages. |
-
-Use actual trace identifiers for your own examples. Keep the full traces in your saved data.
-
-Use the following examples to distinguish nearby failure modes.
-
-| Issue | Example reply | What you check |
-| --- | --- | --- |
-| Policy grounding | "You cannot return sale items." | Look for support in the applicable policy passage. Do not accept the claim based on a citation alone. |
-| Tool grounding | "Your order total is $75." | Compare the amount with the order result. Suppose you have $50 in the result. You have an order fact error, not a policy error. |
-| Capability claim | "I can arrange a pickup through an external courier." | Check the supported scope and available tools. Distinguish an offer from a claim of completed action. |
-| Action outcome | "Your refund is complete." | Check the refund status and `RESP-2`. With `queued_for_approval`, you do not have a completed refund. |
-
-You may find several issues in one trace. Label only the selected mode for the judge. Review a few borderline cases before collecting more labels.
-
-If you change the definition, recheck your earlier labels. Record why you changed each label.
 
 ### Label collection
 
@@ -294,7 +263,6 @@ Commit the files you created:
 | Judge versions, predictions, and critiques | Your mode's files in `analysis/state/judges/` |
 | Your code for exports, judge runs, and metrics | `analysis/run_judges.py` |
 | Development and test metrics | `analysis/report/dev-<judge_id>.json`, `analysis/report/test-<judge_id>.json` |
-| Brief experiment notes | `analysis/report/hw5.md` |
 
 Keep your Homework 4 files too.
 

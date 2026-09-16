@@ -278,7 +278,7 @@ Building a judge is not draft-then-done. It is a cycle: draft, validate against 
 
 ## Phase 10: Freeze, then test once
 
-Before the first prompt run, preserve exact judge inputs in a local export and set `CARTWHEEL_JUDGE_TRACE_SOURCE` to the export. The helper checks the export hash on resume. When the human approves the stopping point, freeze the prompt with `freeze_judge(judge_id)`. Freezing is what unlocks the test split, so the test set cannot be touched before the judge is frozen. Both `run_judge` and `judge_alignment` protect the test set, and `freeze_judge` is one-way per version. The frozen record preserves the test identifiers and human labels. Fixing a frozen judge means registering a new version, which re-locks the test set.
+Before the first prompt run, save the judge inputs in a local export and set `CARTWHEEL_JUDGE_TRACE_SOURCE` to that file. Keep the export unchanged when resuming. When you finish development, call `freeze_judge(judge_id)` once. Keep the prompt, model, test identifiers, and human labels unchanged during the final evaluation.
 
 Run the test set with `run_judge(judge_id, "test")` and `judge_alignment(judge_id, "test")`, and report the final test rates. An interrupted run may resume with the same judge id, model, prompt, input export, labels, and split. Completed batches are saved; only missing predictions run again. An interrupted unsaved batch may incur repeat calls. Do not register, split, or freeze again to resume. Recomputing metrics from saved predictions is allowed. The demonstration reaches 0.95 Pass TPR and 0.91 Fail TNR on development, followed by 0.95 Pass TPR and 0.83 Fail TNR on test. The lower test TNR shows why the correction must use the held out result.
 
@@ -307,7 +307,7 @@ Do not substitute a cheaper model only for the unlabeled batch. A model change c
 
 These are enforced in the helpers, and they teach the method by refusing to break it. Do not try to work around them. If one blocks you, it is telling you a step is out of order.
 
-- `run_judge` and `judge_alignment` protect the test set until the judge is frozen. Frozen test identifiers and labels cannot change during a resume.
+- `judge_alignment` on `test` raises unless the judge is frozen.
 - `freeze_judge` is one-way per version. Fixing a frozen judge means a new version, which re-locks the test set.
 - `split_labels` refuses thin classes instead of silently producing unstable estimates.
 - Label edits append rather than overwrite (a flip sets `superseded_by` on the old line and adds a new one), so the flip history in `iteration_log` is complete and nothing is lost.

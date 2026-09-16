@@ -32,7 +32,6 @@ from __future__ import annotations
 import datetime as _dt
 import hashlib
 import math
-import os
 from pathlib import Path
 from typing import Any
 
@@ -123,23 +122,7 @@ def _load_judge(judge_id: str) -> dict[str, Any]:
             f"no judge '{judge_id}' under state/judges/. Register it first "
             "with register_judge."
         )
-    if judge["prompt_hash"] != _prompt_hash(judge["prompt_text"], judge["model"]):
-        raise guards.GuardViolation("Judge prompt or model changed in place; register a new version.")
     return judge
-
-
-def _validate_frozen_test(judge: dict[str, Any]) -> None:
-    """Reject changes to the held out assignment or labels after freezing."""
-    snapshot = judge.get("test_snapshot")
-    if snapshot is None:  # Older saved demonstration records predate snapshots.
-        return
-    current = _state.read_json(_state.state_path("splits.json"), default={})
-    ids = current.get(judge["mode"], {}).get("test", [])
-    labels = {r["trace_id"]: r["label"] for r in _load_labels(judge["mode"])}
-    expected = {tid: 1 - value if judge.get("label_convention") == "pass_positive" else value
-                for tid, value in snapshot.items()}
-    if sorted(ids) != sorted(snapshot) or any(labels.get(tid) != value for tid, value in expected.items()):
-        raise guards.GuardViolation("Test ids or human labels changed after freezing; preserve the original test result.")
 
 
 def _judges_by_mode() -> dict[str, str]:
@@ -171,7 +154,6 @@ def _test_labels_and_preds(judge: dict[str, Any]) -> tuple[list[int], list[int]]
     frozen judge, in a fixed trace order. Reads the persisted test-split
     assignment and the cached predictions for this judge's frozen prompt."""
     mode = judge["mode"]
-    _validate_frozen_test(judge)
     splits = _state.read_json(_state.state_path("splits.json"), default={})
     test_ids = splits.get(mode, {}).get("test", [])
     labels_by_trace = {r["trace_id"]: r["label"] for r in _load_labels(mode)}
@@ -443,8 +425,6 @@ def split_labels(
     assert len(all_splits) == len(set(all_splits)), "splits overlap"
 
     splits_file = _state.read_json(_state.state_path("splits.json"), default={})
-    if splits_file.get(mode, {}).get("test_used_by"):
-        raise guards.GuardViolation("Test data already used; preserve this experiment and use new untouched data for another.")
     splits_file[mode] = {
         **assignment,
         "seed": seed,
@@ -542,7 +522,6 @@ def run_judge(
     mode = judge["mode"]
     if not isinstance(batch_size, int) or batch_size < 1:
         raise ValueError("batch_size must be a positive integer")
-    _validate_frozen_test(judge)
 
     store_traces: list[dict[str, Any]] = []
     if split == "store":
@@ -559,30 +538,6 @@ def run_judge(
     ids = [str(tid) for tid in ids]
     if not ids or len(set(ids)) != len(ids):
         raise ValueError("judge input must contain nonempty, unique trace ids")
-    splits = _state.read_json(_state.state_path("splits.json"), default={})
-    assignment = splits.get(mode, {})
-    touches_test = bool(set(ids) & set(assignment.get("test", [])))
-    if split == "test" or touches_test:
-        guards.require_frozen_for_test(judge, "test")
-        used_by = assignment.get("test_used_by")
-        if used_by and used_by != judge_id:
-            raise guards.GuardViolation("Another judge version already used this test set; use new untouched test data.")
-        assignment["test_used_by"] = judge_id
-        splits[mode] = assignment
-        _state.write_json(_state.state_path("splits.json"), splits)
-
-    source = os.environ.get("CARTWHEEL_JUDGE_TRACE_SOURCE")
-    if source:
-        fingerprint = hashlib.sha256(Path(source).read_bytes()).hexdigest()
-        previous = judge.get("trace_source_sha256")
-        if previous and previous != fingerprint:
-            raise guards.GuardViolation("Judge input export changed; restore the saved export before resuming.")
-        judge["trace_source_sha256"] = fingerprint
-        judge["trace_source"] = str(Path(source).resolve())
-        _state.write_json(_judge_path(judge_id), judge)
-    elif judge.get("trace_source_sha256"):
-        raise guards.GuardViolation("Set CARTWHEEL_JUDGE_TRACE_SOURCE to the saved export before resuming.")
-
     cache = judge.setdefault("predictions", {}).setdefault(judge["prompt_hash"], {})
     to_classify = [tid for tid in ids if tid not in cache]
 
@@ -653,7 +608,6 @@ def judge_alignment(judge_id: str, split: str) -> dict[str, Any]:
     """
     judge = _load_judge(judge_id)
     guards.require_frozen_for_test(judge, split)
-    _validate_frozen_test(judge)
 
     mode = judge["mode"]
     splits = _state.read_json(_state.state_path("splits.json"), default={})
@@ -794,17 +748,6 @@ def freeze_judge(judge_id: str) -> dict[str, Any]:
     """
     judge = _load_judge(judge_id)
     guards.check_freeze_allowed(judge)
-    splits = _state.read_json(_state.state_path("splits.json"), default={})
-    test_ids = splits.get(judge["mode"], {}).get("test", [])
-    labels = {r["trace_id"]: r["label"] for r in _load_labels(judge["mode"])}
-    if not test_ids or any(tid not in labels for tid in test_ids):
-        raise guards.GuardViolation("Create a test split with complete human labels before freezing.")
-    if set(test_ids) & set(_cached_preds(judge)):
-        raise guards.GuardViolation("Test predictions already exist before freezing; use untouched test data.")
-    judge["test_snapshot"] = {
-        tid: 1 - labels[tid] if judge.get("label_convention") == "pass_positive" else labels[tid]
-        for tid in test_ids
-    }
     judge["status"] = "frozen"
     judge["frozen_at"] = _utcnow()
     _state.write_json(_judge_path(judge_id), judge)

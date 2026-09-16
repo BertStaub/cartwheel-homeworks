@@ -63,7 +63,7 @@ def _decode_judge_rows(rows: list[dict[str, Any]], trace_ids: list[str]) -> Judg
 def load_store_traces() -> list[dict[str, Any]]:
     """Load the full store slice the frozen judge scales over.
 
-    Use ``CARTWHEEL_JUDGE_TRACE_SOURCE`` for an explicit immutable JSON/JSONL
+    Use ``CARTWHEEL_JUDGE_TRACE_SOURCE`` for an explicit JSON/JSONL
     export. Otherwise source from Langfuse when configured (``LANGFUSE_*``),
     pulling the error analysis trace slice via
     :func:`analysis.helpers.langfuse_io.fetch_traces`; otherwise reads and
@@ -109,9 +109,7 @@ def _backend() -> str:
     Return ``docetl`` when a model key is present and ``none`` in an offline
     environment.
     """
-    if any(os.environ.get(key) for key in (
-        "GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "TOGETHER_API_KEY"
-    )):
+    if os.environ.get("GEMINI_API_KEY") or os.environ.get("OPENAI_API_KEY"):
         return "docetl"
     return "none"
 

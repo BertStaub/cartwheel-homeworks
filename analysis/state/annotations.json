@@ -19,6 +19,30 @@
       "note": "more stuff",
       "ts": "2026-09-15T16:59:34.090647+00:00",
       "session_id": "e274a41d45aa44f28fae598c280f1668"
+    },
+    {
+      "id": "60db31fb25a3415a8761ebfaacf4cd71",
+      "trace_id": "1b078746c7a7412198b48b0e16a8c3ef",
+      "quote": "{\n  \"query\": \"teapot\",\n  \"store\": null,\n  \"max_price_usd\": 90,\n  \"limit\": 5\n}",
+      "start": null,
+      "end": null,
+      "note": "test",
+      "ts": "2026-09-16T15:30:56.235881+00:00",
+      "session_id": "e55dda81b4984464ab132228271c942d",
+      "segment_index": 1,
+      "segment_label": "tool call: search_products"
+    },
+    {
+      "id": "c759591d5a9746b186dd31f0b8f26a30",
+      "trace_id": "1b078746c7a7412198b48b0e16a8c3ef",
+      "quote": "Great news — here are some teapot options that fit within your $90 budget:\n\n| # | Teapot | Price | Store |\n|---|--------|-------|-------|\n| 1 | **Matte Teapot**",
+      "start": null,
+      "end": null,
+      "note": "test1",
+      "ts": "2026-09-16T15:31:09.277799+00:00",
+      "session_id": "e55dda81b4984464ab132228271c942d",
+      "segment_index": 3,
+      "segment_label": "assistant message"
     }
   ]
 }

@@ -166,6 +166,20 @@
     font-size: 13px;
   }
   .note-item .note-ts { font-size: 10px; color: #92400e; margin-top: 4px; }
+  .note-item .note-target {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #92400e;
+    margin-bottom: 2px;
+  }
+  .segment-note-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 400;
+    text-transform: none;
+    color: #92400e;
+  }
 
   /* floating annotation popover */
   .annotation-popover {
@@ -179,6 +193,16 @@
     padding: 10px;
     cursor: default;
   }
+  .annotation-popover-target {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 6px;
+  }
+  .annotation-popover-existing { max-height: 120px; overflow-y: auto; margin-bottom: 8px; }
+  .annotation-popover-existing:empty { display: none; }
+  .annotation-popover-existing .note-item { font-size: 12px; }
   .annotation-popover textarea {
     width: 100%;
     min-height: 70px;
@@ -267,6 +291,26 @@ function annotationsFor(traceId) {
   return state.annotations.filter((a) => a.trace_id === traceId);
 }
 
+// Notes for one exact message/tool-call within a trace (segment_index),
+// as opposed to annotationsFor which returns every note on the whole trace.
+function annotationsForSegment(traceId, segmentIndex) {
+  return annotationsFor(traceId).filter((a) => a.segment_index === segmentIndex);
+}
+
+function renderNotesHtml(notes) {
+  if (!notes.length) return '<div class="empty-state" style="padding:12px;">No annotations yet.</div>';
+  return notes
+    .map(
+      (n) => `
+        <div class="note-item">
+          ${n.segment_label ? `<div class="note-target">on: ${escapeHtml(n.segment_label)}</div>` : ''}
+          ${escapeHtml(n.note)}
+          <div class="note-ts">${escapeHtml(n.ts)}</div>
+        </div>`
+    )
+    .join('');
+}
+
 function renderSidebar() {
   const summary = document.getElementById('sidebar-summary');
   if (state.status === 'loading') {
@@ -315,10 +359,16 @@ function renderStatusBanner() {
   }
 }
 
-function renderToolPair(callMsg, resultMsg) {
+function noteBadge(traceId, segmentIndex) {
+  const count = annotationsForSegment(traceId, segmentIndex).length;
+  return count ? `<span class="segment-note-badge">📝 ${count}</span>` : '';
+}
+
+function renderToolPair(callMsg, resultMsg, index, traceId) {
+  const label = `tool call: ${callMsg.name || 'tool'}`;
   return `
-    <div class="tool-pair">
-      <div class="tool-name">🔧 ${escapeHtml(callMsg.name || 'tool')}</div>
+    <div class="tool-pair" data-segment-index="${index}" data-segment-label="${escapeHtml(label)}">
+      <div class="tool-name">🔧 ${escapeHtml(callMsg.name || 'tool')} ${noteBadge(traceId, index)}</div>
       <details class="tool-half">
         <summary>arguments</summary>
         <pre>${escapeHtml(fmtJson(callMsg.arguments))}</pre>
@@ -331,24 +381,26 @@ function renderToolPair(callMsg, resultMsg) {
     </div>`;
 }
 
-function renderMessage(msg) {
+function renderMessage(msg, index, traceId) {
   if (msg.role === 'user' || msg.role === 'assistant') {
+    const label = `${msg.role} message`;
     return `
-      <div class="msg role-${msg.role}">
-        <div class="role-label">${msg.role}</div>
+      <div class="msg role-${msg.role}" data-segment-index="${index}" data-segment-label="${escapeHtml(label)}">
+        <div class="role-label">${msg.role} ${noteBadge(traceId, index)}</div>
         <div class="msg-text">${escapeHtml(msg.text || '')}</div>
       </div>`;
   }
   // system / observation / anything else: muted, low priority
   const text = msg.text || fmtJson(msg.content ?? msg);
+  const label = msg.role || msg.label || 'note';
   return `
-    <div class="msg" style="opacity:0.6;">
-      <div class="role-label">${escapeHtml(msg.role || msg.label || 'note')}</div>
+    <div class="msg" data-segment-index="${index}" data-segment-label="${escapeHtml(label)}" style="opacity:0.6;">
+      <div class="role-label">${escapeHtml(label)} ${noteBadge(traceId, index)}</div>
       <div class="msg-text">${escapeHtml(text)}</div>
     </div>`;
 }
 
-function renderConversation(messages) {
+function renderConversation(messages, traceId) {
   let html = '';
   let i = 0;
   while (i < messages.length) {
@@ -356,17 +408,17 @@ function renderConversation(messages) {
     if (m.role === 'tool_call') {
       const next = messages[i + 1];
       const paired = next && next.role === 'tool_result' ? next : null;
-      html += renderToolPair(m, paired);
+      html += renderToolPair(m, paired, i, traceId);
       i += paired ? 2 : 1;
       continue;
     }
     if (m.role === 'tool_result') {
       // an orphaned result with no preceding call (rare); show it alone
-      html += renderToolPair({ name: m.name, arguments: null }, m);
+      html += renderToolPair({ name: m.name, arguments: null }, m, i, traceId);
       i += 1;
       continue;
     }
-    html += renderMessage(m);
+    html += renderMessage(m, i, traceId);
     i += 1;
   }
   return html || '<div class="empty-state">No conversation content on this trace.</div>';
@@ -405,14 +457,7 @@ function renderContent(trace) {
     metaBits.push(`session: <a href="${trace.session_permalink}" target="_blank">${trace.session_id.slice(0, 12)}…</a>`);
   }
 
-  const notes = annotationsFor(trace.trace_id);
-  const notesHtml = notes.length
-    ? notes.map((n) => `
-        <div class="note-item">
-          ${escapeHtml(n.note)}
-          <div class="note-ts">${escapeHtml(n.ts)}</div>
-        </div>`).join('')
-    : '<div class="empty-state" style="padding:12px;">No annotations yet.</div>';
+  const notesHtml = renderNotesHtml(annotationsFor(trace.trace_id));
 
   document.getElementById('content').innerHTML = `
     <div class="header-block">
@@ -420,37 +465,46 @@ function renderContent(trace) {
       <div class="header-meta">${metaBits.join(' &middot; ')}</div>
     </div>
     ${renderExpected(trace)}
-    <div id="conversation">${renderConversation(trace.trace || [])}</div>
+    <div id="conversation">${renderConversation(trace.trace || [], trace.trace_id)}</div>
     <div id="annotation-section">
       <h4>Annotations</h4>
-      <p class="hint">Click a message or tool call to add a note.</p>
+      <p class="hint">Click a message or tool call to add a note about that specific item.</p>
       <div id="annotation-list">${notesHtml}</div>
     </div>
   `;
 
   // Click-to-annotate: clicking a message or tool-call block opens a floating
-  // popover near the click. Excludes <summary> so the JSON expand/collapse
-  // toggle still works untouched.
+  // popover near the click, tied to that specific block (not the whole
+  // trace). Excludes <summary> so the JSON expand/collapse toggle still
+  // works untouched.
   document.getElementById('conversation').addEventListener('click', (event) => {
     if (event.target.closest('summary')) return;
     const block = event.target.closest('.msg, .tool-pair');
-    if (block) openAnnotationPopover(event.clientX, event.clientY, trace);
+    if (!block) return;
+    const segmentIndex = Number(block.dataset.segmentIndex);
+    const segmentLabel = block.dataset.segmentLabel || null;
+    openAnnotationPopover(event.clientX, event.clientY, trace, segmentIndex, segmentLabel);
   });
 }
 
-async function refreshAnnotationList(trace) {
+async function refreshAnnotationList(trace, segmentIndex) {
   state.annotations = (await apiGet('/api/annotations')).annotations || [];
-  const notes = annotationsFor(trace.trace_id);
   const list = document.getElementById('annotation-list');
-  if (list) {
-    list.innerHTML = notes.length
-      ? notes.map((n) => `
-          <div class="note-item">
-            ${escapeHtml(n.note)}
-            <div class="note-ts">${escapeHtml(n.ts)}</div>
-          </div>`).join('')
-      : '<div class="empty-state" style="padding:12px;">No annotations yet.</div>';
+  if (list) list.innerHTML = renderNotesHtml(annotationsFor(trace.trace_id));
+
+  // Update just the one block's note badge in place, rather than
+  // re-rendering the whole conversation, so every other block's open
+  // <details> panels are left completely undisturbed.
+  if (segmentIndex !== null && segmentIndex !== undefined) {
+    const block = document.querySelector(`#conversation [data-segment-index="${segmentIndex}"]`);
+    const badgeHost = block ? block.querySelector('.role-label, .tool-name') : null;
+    if (badgeHost) {
+      badgeHost.querySelector('.segment-note-badge')?.remove();
+      const count = annotationsForSegment(trace.trace_id, segmentIndex).length;
+      if (count) badgeHost.insertAdjacentHTML('beforeend', ` <span class="segment-note-badge">📝 ${count}</span>`);
+    }
   }
+
   // Keep the poll-signature in sync so the periodic poll does not also
   // re-render the whole pane (and reset every open <details>) right after.
   state.renderedSignature = traceSignature(trace);
@@ -472,14 +526,25 @@ function popoverOutsideClickHandler(event) {
   if (popover && !popover.contains(event.target)) closeAnnotationPopover();
 }
 
-function openAnnotationPopover(clientX, clientY, trace) {
+function openAnnotationPopover(clientX, clientY, trace, segmentIndex, segmentLabel) {
   closeAnnotationPopover();
+
+  // Segment label is already shown once above, so drop it from each note
+  // here to avoid repeating "on: ..." for every existing note on this item.
+  // Nothing rendered at all when there are no prior notes (not even the
+  // usual "No annotations yet" placeholder) -- noisy for a first-time note.
+  const segmentNotes = annotationsForSegment(trace.trace_id, segmentIndex);
+  const existing = segmentNotes.length
+    ? renderNotesHtml(segmentNotes.map((n) => ({ ...n, segment_label: null })))
+    : '';
 
   const popover = document.createElement('div');
   popover.id = 'annotation-popover';
   popover.className = 'annotation-popover';
   popover.innerHTML = `
-    <textarea placeholder="Write a note about this trace..."></textarea>
+    <div class="annotation-popover-target">on: ${escapeHtml(segmentLabel || 'this item')}</div>
+    <div class="annotation-popover-existing">${existing}</div>
+    <textarea placeholder="Write a note about this specific item..."></textarea>
     <div class="annotation-popover-actions">
       <button class="cancel">Cancel</button>
       <button class="save">Save</button>
@@ -501,6 +566,11 @@ function openAnnotationPopover(clientX, clientY, trace) {
   const textarea = popover.querySelector('textarea');
   textarea.focus();
 
+  const segmentMessage = trace.trace ? trace.trace[segmentIndex] : null;
+  const quotePreview = segmentMessage
+    ? (segmentMessage.text || fmtJson(segmentMessage.arguments ?? segmentMessage.content ?? '')).slice(0, 160)
+    : null;
+
   popover.querySelector('.cancel').addEventListener('click', closeAnnotationPopover);
   popover.querySelector('.save').addEventListener('click', async () => {
     const note = textarea.value.trim();
@@ -509,9 +579,12 @@ function openAnnotationPopover(clientX, clientY, trace) {
       trace_id: trace.trace_id,
       note,
       session_id: trace.session_id,
+      segment_index: segmentIndex,
+      segment_label: segmentLabel,
+      quote: quotePreview,
     });
     closeAnnotationPopover();
-    await refreshAnnotationList(trace);
+    await refreshAnnotationList(trace, segmentIndex);
   });
 
   document.addEventListener('keydown', popoverEscapeHandler);

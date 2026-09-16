@@ -8,17 +8,26 @@ app: one page, one scenario at a time, showing:
   - each tool call rendered next to its result,
   - the scenario's expected outcome, read from the scenario JSONL files
     (``scenarios/pilot_scenarios.jsonl`` and ``scenarios/support_scenarios.jsonl``),
-  - one free-text annotation field per trace.
+  - a free-text annotation field tied to the specific message or tool call
+    clicked, not the trace as a whole.
 
 Annotations are appended to ``analysis/state/annotations.json`` in the same
 shape the course reference app reads (``{id, trace_id, quote, start, end,
-note, ts}``), plus one extra ``session_id`` field. That field exists because
-Homework 3 added a ``session.id`` span attribute (not part of the course
-instructions) so Langfuse groups a multi-turn scenario's several traces into
-one conversation; this app resolves it and records it so a note can be traced
-back to the right Langfuse session, not just a single component trace. The
-reference app ignores fields it does not know about, so the shared file stays
-readable by both.
+note, ts}``), plus two extra fields:
+
+  - ``session_id``: Homework 3 added a ``session.id`` span attribute (not
+    part of the course instructions) so Langfuse groups a multi-turn
+    scenario's several traces into one conversation; this app resolves it
+    and records it so a note can be traced back to the right Langfuse
+    session, not just a single component trace.
+  - ``segment_index`` / ``segment_label``: which exact message or tool call
+    within the trace's ordered message list the note is about (an index
+    into that list, and a short label like ``"tool call: get_order"``).
+    ``quote`` is populated with a short preview of that item's text instead
+    of staying null.
+
+The reference app ignores fields it does not know about, so the shared file
+stays readable by both.
 
 Run:
     uv run python -m analysis.alt_server            # serves on :8040
@@ -189,12 +198,17 @@ def _append_annotation(payload: dict[str, Any]) -> dict[str, Any]:
     record = {
         "id": uuid.uuid4().hex,
         "trace_id": trace_id,
-        "quote": None,
+        "quote": payload.get("quote"),
         "start": None,
         "end": None,
         "note": note,
         "ts": datetime.now(timezone.utc).isoformat(),
         "session_id": payload.get("session_id"),
+        # Which exact message or tool call this note is about -- the index
+        # into that trace's ordered message list, and a short human-readable
+        # label (e.g. "tool call: get_order"), not just a whole-trace note.
+        "segment_index": payload.get("segment_index"),
+        "segment_label": payload.get("segment_label"),
     }
     data = _read_annotations()
     data["annotations"].append(record)

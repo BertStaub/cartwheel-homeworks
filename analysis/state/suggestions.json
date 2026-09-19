@@ -1,1 +1,145 @@
-[]
+[
+  {
+    "id": "42d11ead11f84044adcb231b4489b7ba",
+    "trace_id": "13a854ddac7cec7a65e7a1cd9ecbb450",
+    "mode": "refund_proceeds_past_eligibility_window",
+    "quote": "issue_refund succeeded, delivered 87 days before the request (30-day window)",
+    "start": null,
+    "end": null,
+    "reason": "code-check search: recomputed is_refund_eligible() against the trace timestamp for every issue_refund success in the unsampled pool",
+    "status": "accepted",
+    "reviewed_ts": "2026-09-19T17:41:42.607595+00:00"
+  },
+  {
+    "id": "1caa55a127a2441ba91d6c1a22c448fa",
+    "trace_id": "fc9b253d3490299bd75ff8d64b6d1654",
+    "mode": "refund_proceeds_past_eligibility_window",
+    "quote": "issue_refund succeeded, delivered 88 days before the request (30-day window)",
+    "start": null,
+    "end": null,
+    "reason": "code-check search: recomputed is_refund_eligible() against the trace timestamp for every issue_refund success in the unsampled pool",
+    "status": "accepted",
+    "reviewed_ts": "2026-09-19T17:41:42.607603+00:00"
+  },
+  {
+    "id": "c0a03a37b8a947359c8ae9eaa602c095",
+    "trace_id": "fc7eec42bdd02b8156fa8ecf7cbafe85",
+    "mode": "refund_proceeds_past_eligibility_window",
+    "quote": "issue_refund succeeded, delivered 89 days before the request (30-day window)",
+    "start": null,
+    "end": null,
+    "reason": "code-check search: recomputed is_refund_eligible() against the trace timestamp for every issue_refund success in the unsampled pool",
+    "status": "accepted",
+    "reviewed_ts": "2026-09-19T17:41:42.607607+00:00"
+  },
+  {
+    "id": "8868c357d9d84c20a9a166d560e3eb10",
+    "trace_id": "4b417bc2ce85eed9d029848765742f34",
+    "mode": "refund_proceeds_past_eligibility_window",
+    "quote": "issue_refund succeeded, delivered 93 days before the request (30-day window)",
+    "start": null,
+    "end": null,
+    "reason": "code-check search: recomputed is_refund_eligible() against the trace timestamp for every issue_refund success in the unsampled pool",
+    "status": "accepted",
+    "reviewed_ts": "2026-09-19T17:41:42.607610+00:00"
+  },
+  {
+    "id": "292920476c014182b0d43d307323658d",
+    "trace_id": "f75a784b0e8f04c886601a9c21c2054f",
+    "mode": "refund_proceeds_past_eligibility_window",
+    "quote": "issue_refund succeeded, delivered 91 days before the request (30-day window)",
+    "start": null,
+    "end": null,
+    "reason": "code-check search: recomputed is_refund_eligible() against the trace timestamp for every issue_refund success in the unsampled pool",
+    "status": "accepted",
+    "reviewed_ts": "2026-09-19T17:41:42.607613+00:00"
+  },
+  {
+    "id": "5377b28d91f84d4ab8815e1a07782f2e",
+    "trace_id": "2cdc4b8a20235bc0ad0ca72451625986",
+    "mode": "unsolicited_reply_content",
+    "quote": null,
+    "start": null,
+    "end": null,
+    "reason": "matches confirmed pattern: \"not great news\" tone, near-identical to support-0213",
+    "status": "accepted",
+    "reviewed_ts": "2026-09-19T17:51:08.786178+00:00"
+  },
+  {
+    "id": "92d37a0cc905475398bdb28d84c758ce",
+    "trace_id": "04eff4bd240372db5dffea9c78c71649",
+    "mode": "unsolicited_reply_content",
+    "quote": null,
+    "start": null,
+    "end": null,
+    "reason": "matches confirmed pattern: \"Done!\" opener, same as support-0089/0185",
+    "status": "accepted",
+    "reviewed_ts": "2026-09-19T17:51:08.786178+00:00"
+  },
+  {
+    "id": "cc804b0e98af4c9980b1eebfe28e3468",
+    "trace_id": "58ec181ca55dbac1ce38c9362e418546",
+    "mode": "unsolicited_reply_content",
+    "quote": null,
+    "start": null,
+    "end": null,
+    "reason": "reasonable customer-service guidance (\"reach out again\"), not the same overreach pattern",
+    "status": "rejected",
+    "reviewed_ts": "2026-09-19T17:51:08.786178+00:00"
+  },
+  {
+    "id": "4bc019e43213430e817b251d2492d4a6",
+    "trace_id": "228543c7c3810a9c0f46358bfe4f4348",
+    "mode": "unsolicited_reply_content",
+    "quote": null,
+    "start": null,
+    "end": null,
+    "reason": "opposite of a violation -- correctly flags a genuine data inconsistency and recommends escalation (RESP-3), not this mode",
+    "status": "rejected",
+    "reviewed_ts": "2026-09-19T17:51:08.786178+00:00"
+  },
+  {
+    "id": "9f08fd7a0aaf488cb4ad3c094f550d5e",
+    "trace_id": "d98e80f5db3d56585a0143ef79b9aa3f",
+    "mode": "unsolicited_reply_content",
+    "quote": null,
+    "start": null,
+    "end": null,
+    "reason": "clean, neutral reply; escalation offered only conditionally, no tone flourish or unprompted suggestion",
+    "status": "rejected",
+    "reviewed_ts": "2026-09-19T17:51:08.786178+00:00"
+  },
+  {
+    "id": "64efca28045c4fb4b031da8b59e94137",
+    "trace_id": "9973dc2913008c86763cc744e8679659",
+    "mode": "unsolicited_reply_content",
+    "quote": null,
+    "start": null,
+    "end": null,
+    "reason": "borderline cheerful closer (\"Happy to help however I can!\") but weaker than the confirmed threshold; left out of the confirmed count",
+    "status": "rejected",
+    "reviewed_ts": "2026-09-19T17:51:08.786178+00:00"
+  },
+  {
+    "id": "878c3cc7261a4c4094a27a3021431082",
+    "trace_id": "42ea43d7074e964d1202b72e1e68b2b8",
+    "mode": "unsolicited_reply_content",
+    "quote": null,
+    "start": null,
+    "end": null,
+    "reason": "wrong domain: a general merchant policy question, not a customer-specific refund interaction; matched only on shared vocabulary",
+    "status": "rejected",
+    "reviewed_ts": "2026-09-19T17:51:08.786178+00:00"
+  },
+  {
+    "id": "79c56d006761409b962ea946ee76ca9b",
+    "trace_id": "a6c3ce442f2da94c607a3c13227f3587",
+    "mode": "unsolicited_reply_content",
+    "quote": null,
+    "start": null,
+    "end": null,
+    "reason": "clean, neutral reply; correctly cites the store override, escalation offered only conditionally",
+    "status": "rejected",
+    "reviewed_ts": "2026-09-19T17:51:08.786178+00:00"
+  }
+]

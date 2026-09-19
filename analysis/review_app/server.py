@@ -30,8 +30,8 @@ The reference app ignores fields it does not know about, so the shared file
 stays readable by both.
 
 Run:
-    uv run python -m analysis.alt_server            # serves on :8040
-    uv run python -m analysis.alt_server --port 8041
+    uv run python -m analysis.review_app.server            # serves on :8040
+    uv run python -m analysis.review_app.server --port 8041
 """
 
 from __future__ import annotations
@@ -49,8 +49,8 @@ from analysis.helpers._state import read_json, state_path, write_json
 from analysis.helpers.normalization import _data, _merge_multi_turn, normalize_trace
 
 HERE = Path(__file__).resolve().parent
-REPO_ROOT = HERE.parent
-UI_DIR = HERE / "ui_alt"
+REPO_ROOT = HERE.parent.parent
+UI_DIR = HERE
 ANNOTATIONS_PATH = state_path("annotations.json")
 
 SCENARIO_FILES = [
@@ -108,14 +108,14 @@ def _fetch_all_traces() -> list[dict[str, Any]]:
             break
         page += 1
 
-    print(f"[alt_server] fetching {len(summaries)} full trace records from Langfuse...", flush=True)
+    print(f"[review_app] fetching {len(summaries)} full trace records from Langfuse...", flush=True)
     raw_by_id: dict[str, dict[str, Any]] = {}
     for i, summary in enumerate(summaries, 1):
         full = _data(lf.api.trace.get(summary.id))
         if isinstance(full, dict) and full.get("id"):
             raw_by_id[str(full["id"])] = full
         if i % 25 == 0 or i == len(summaries):
-            print(f"[alt_server]   ...{i}/{len(summaries)}", flush=True)
+            print(f"[review_app]   ...{i}/{len(summaries)}", flush=True)
 
     session_by_trace = {tid: raw.get("sessionId") for tid, raw in raw_by_id.items()}
 
@@ -126,7 +126,7 @@ def _fetch_all_traces() -> list[dict[str, Any]]:
         except ValueError as exc:
             # A trace with no renderable content (e.g. the orphaned timeout
             # attempt from a killed run) should not take down the whole page.
-            print(f"[alt_server]   skipping {trace_id}: {exc}", flush=True)
+            print(f"[review_app]   skipping {trace_id}: {exc}", flush=True)
             continue
         session_id = session_by_trace.get(trace_id)
         record["session_id"] = session_id
@@ -163,14 +163,14 @@ def refresh_traces() -> None:
         with _cache_lock:
             _cache["status"] = "error"
             _cache["error"] = str(exc)
-        print(f"[alt_server] fetch failed: {exc}", flush=True)
+        print(f"[review_app] fetch failed: {exc}", flush=True)
         return
 
     with _cache_lock:
         _cache["traces"] = traces
         _cache["fetched_at"] = datetime.now(timezone.utc).isoformat()
         _cache["status"] = "ready"
-    print(f"[alt_server] ready: {len(traces)} scenarios loaded", flush=True)
+    print(f"[review_app] ready: {len(traces)} scenarios loaded", flush=True)
 
 
 def _snapshot() -> dict[str, Any]:
@@ -203,6 +203,12 @@ def _append_annotation(payload: dict[str, Any]) -> dict[str, Any]:
         "end": None,
         "note": note,
         "ts": datetime.now(timezone.utc).isoformat(),
+        # This tool has no AI-suggestion pipeline (that's Part C/D work), so
+        # every annotation it writes is authored by the reviewer. Recorded
+        # explicitly because analysis.helpers.reporting's failure_report
+        # only counts a mode's origin as proven when it traces back to an
+        # annotation with author == "human".
+        "author": "human",
         "session_id": payload.get("session_id"),
         # Which exact message or tool call this note is about -- the index
         # into that trace's ordered message list, and a short human-readable
@@ -218,7 +224,7 @@ def _append_annotation(payload: dict[str, Any]) -> dict[str, Any]:
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt: str, *args: Any) -> None:  # quieter default log
-        print(f"[alt_server] {self.address_string()} {fmt % args}", flush=True)
+        print(f"[review_app] {self.address_string()} {fmt % args}", flush=True)
 
     def _send_json(self, payload: Any, status: int = 200) -> None:
         body = json.dumps(payload).encode("utf-8")
@@ -279,7 +285,7 @@ def main() -> None:
     threading.Thread(target=refresh_traces, daemon=True).start()
 
     server = ThreadingHTTPServer((args.host, args.port), Handler)
-    print(f"[alt_server] serving on http://{args.host}:{args.port} (fetching traces in the background)", flush=True)
+    print(f"[review_app] serving on http://{args.host}:{args.port} (fetching traces in the background)", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

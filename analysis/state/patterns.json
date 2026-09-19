@@ -1,1 +1,322 @@
-{"modes": []}
+{
+  "modes": [
+    {
+      "name": "refund_proceeds_past_eligibility_window",
+      "definition": "A refund is auto-approved or queued for approval because get_order/issue_refund reports the order as refund-eligible, when the order's actual age (the trace's own timestamp minus delivered_at) exceeds the applicable return-window days (the platform default, or a store override) as of when the request was made.",
+      "status": "confirmed",
+      "count": 8,
+      "example_trace_ids": [
+        "454f8e151e47768bf7f80c5271799dad",
+        "a28cb11493c8f672dcba5caefe11ee4d",
+        "70d0dcc5d532f7226345ce2558260a63",
+        "13a854ddac7cec7a65e7a1cd9ecbb450",
+        "fc9b253d3490299bd75ff8d64b6d1654",
+        "fc7eec42bdd02b8156fa8ecf7cbafe85",
+        "4b417bc2ce85eed9d029848765742f34",
+        "f75a784b0e8f04c886601a9c21c2054f"
+      ],
+      "close_negative_trace_ids": [],
+      "created_from": [
+        "454f8e151e47768bf7f80c5271799dad",
+        "a28cb11493c8f672dcba5caefe11ee4d",
+        "70d0dcc5d532f7226345ce2558260a63"
+      ],
+      "origin_scenario_ids": [
+        "support-0239", "support-0116", "support-0240",
+        "support-0028", "support-0029", "support-0114", "support-0117", "support-0152"
+      ],
+      "example_quotes": [
+        "issue_refund succeeded (queued_for_approval) for order 812, delivered 98 days before the request",
+        "issue_refund succeeded (auto_approved) for order 1825, delivered 96 days before the request",
+        "issue_refund succeeded (auto_approved) for order 1689, delivered 85 days before the request"
+      ],
+      "boundary": "Distinct from overstates_write_status: that mode is about the reply's wording being more confident than the tool's own reported status; this mode is about the tool's reported status itself being wrong relative to true calendar time. A trace only belongs here if delivered_at-to-request-time exceeds the applicable return-window days while get_order/issue_refund still reports the order eligible -- not a stylistic complaint about phrasing.",
+      "root_cause": "seed/generate.py calls is_refund_eligible() exactly once, at database-seed time, and stores the boolean result in the orders.refund_eligible column. agent/db.py reads that column directly; nothing recomputes it against the real current date when the agent later calls get_order/issue_refund, so the flag silently goes stale as real time passes since the database was seeded. All eight confirmed instances are 85-98 days past delivery at request time, well outside the 30-day platform window, yet all reported refund_eligible: true.",
+      "evaluator_type": "code",
+      "evaluator_note": "Recompute is_refund_eligible(as_of=<request/trace timestamp>, delivered_at, return_window_days) independently and compare against what get_order/issue_refund actually reported and allowed, rather than trusting the stored column as ground truth.",
+      "requirement_source": "TOOL-11 (new -- added to SPEC.md, motivated by support-0239/support-0116/support-0240; TOOL-4/TOOL-7/TOOL-8 previously assumed refund_eligible was authoritative without requiring it to reflect the current date at request time)",
+      "known_gaps": "Exhaustively searched: recomputed live eligibility (seed.eligibility.is_refund_eligible, with each store's actual return-window override) for every issue_refund success across all 250 support scenarios, sampled and unsampled alike. Result: 8 of 8 successful refunds are stale-eligibility instances; zero are genuinely within their window at request time. A close negative may not exist anywhere in this dataset -- the database appears to have been seeded once, long enough ago that essentially no order remains genuinely within a 30-day window by the time any trace runs. This is a dataset-wide limitation, not a search failure, and is worth reporting as such rather than continuing to search for something that may not exist."
+    },
+    {
+      "name": "overstates_write_status",
+      "definition": "The reply describes a refund/cancellation that requires human approval using completed-action language, either by (a) calling it a bare \"refund\"/\"cancellation\" instead of a \"request\" in any tense (past, present, or prospective), or (b) asserting the pending human decision's outcome as certain (e.g. \"will approve\", \"once approved\") rather than conditional (\"if approved\"). Applies only when the tool result is queued_for_approval or otherwise not yet finally decided by a human.",
+      "status": "confirmed",
+      "count": 9,
+      "example_trace_ids": [
+        "47538c7eafddbae0bd30bc15b0245eda",
+        "9b0414b88b66fe7c3e1d0b32713c56d7",
+        "24e4e28fa14445fa6c3929f4ea297b25",
+        "39ca528573c2064a87a75e0bd94b62b2",
+        "74aa825ef7741bfb86a20f6e3d781ba7",
+        "c383b838ee904f05a329a402160a5a31",
+        "6059386ed3a07318c0e42ce1cfd82b0a",
+        "f1c9aa3857940ea7ec71a38d9ee9e738",
+        "337e9e3ebda31cc63d49ae62ea8d0a5d"
+      ],
+      "close_negative_trace_ids": [
+        "a28cb11493c8f672dcba5caefe11ee4d",
+        "70d0dcc5d532f7226345ce2558260a63"
+      ],
+      "created_from": [
+        "47538c7eafddbae0bd30bc15b0245eda",
+        "9b0414b88b66fe7c3e1d0b32713c56d7",
+        "24e4e28fa14445fa6c3929f4ea297b25",
+        "39ca528573c2064a87a75e0bd94b62b2",
+        "74aa825ef7741bfb86a20f6e3d781ba7",
+        "c383b838ee904f05a329a402160a5a31",
+        "6059386ed3a07318c0e42ce1cfd82b0a",
+        "f1c9aa3857940ea7ec71a38d9ee9e738",
+        "337e9e3ebda31cc63d49ae62ea8d0a5d"
+      ],
+      "origin_scenario_ids": [
+        "support-0026", "support-0031", "support-0037", "support-0154",
+        "support-0034", "support-0151", "support-0168", "support-0211", "support-0209"
+      ],
+      "example_quotes": [
+        "\"Would you like me to go ahead and submit the refund?\" -- bare \"refund\", should be \"refund request\" (support-0031)",
+        "\"a human support agent will review and approve it shortly\" -- presupposes approval as certain (support-0026)",
+        "\"Your refund has been submitted!... Status: Queued for human approval\" -- bare \"refund\", same construction as the handout's own worked example (support-0211)"
+      ],
+      "boundary": "Distinct from refund_proceeds_past_eligibility_window: that mode is about the tool's reported eligibility status itself being wrong due to stale data; this mode is about reply phrasing overstating certainty about a pending human-approval decision, regardless of whether the underlying eligibility determination was correct. The close negatives (support-0116, support-0240) show the boundary precisely: both use the same completed-tense \"refund has been processed/approved\" language, but there it is accurate because the tool actually returned auto_approved, not queued_for_approval.",
+      "evaluator_type": "judge",
+      "evaluator_note": "Requires judging reply phrasing against the tool's actual returned status (queued_for_approval vs. auto_approved) and checking for completed-tense or certainty language -- not a simple keyword match, since the exact wording varies (\"submitted\", \"will approve\", \"once approved\", \"issue the refund\").",
+      "requirement_source": "RESP-2 (existing -- no SPEC revision needed; this mode is a direct instance of RESP-2's \"do not claim an action succeeded before the tool reports success\", extended to include claiming or presupposing a human approval that has not happened yet).",
+      "known_gaps": "None currently -- 9 confirmed positives and 2 close negatives, well above the handout's minimums."
+    },
+    {
+      "name": "store_id_shown_instead_of_name",
+      "definition": "A reply names a store by its raw numeric store_id (e.g. \"Store 2\", \"Store #3\") in a context where a human-readable store name would normally appear, because the tool result the reply was built from never included a store name.",
+      "status": "confirmed",
+      "count": 6,
+      "example_trace_ids": [
+        "59331e67fbb508b686af707d7a120d69",
+        "7984a4b46583062c9b6214a54cff9cdf",
+        "514af7388a958728868fcab2de217f16",
+        "eeae89e50015960e369008cfbdeca727",
+        "1f7749066d7f0bcba44d435ccfa274f4",
+        "76af887da5a0c48daac5621cfa9cf4fb"
+      ],
+      "close_negative_trace_ids": [],
+      "created_from": [
+        "59331e67fbb508b686af707d7a120d69",
+        "7984a4b46583062c9b6214a54cff9cdf",
+        "514af7388a958728868fcab2de217f16",
+        "eeae89e50015960e369008cfbdeca727",
+        "1f7749066d7f0bcba44d435ccfa274f4",
+        "76af887da5a0c48daac5621cfa9cf4fb"
+      ],
+      "origin_scenario_ids": [
+        "support-0083", "support-0085", "support-0165",
+        "support-0167", "support-0197", "support-0200"
+      ],
+      "example_quotes": [
+        "\"Available in Store #3\" (support-0083)",
+        "\"Store 2\" / \"Store 1\" in a product comparison table (support-0085)",
+        "\"Product ID: 19 | Store: Store 1\" (support-0165)"
+      ],
+      "boundary": "Distinct from overstates_write_status: that mode is about the reply overstating certainty in its own language; this mode is not a language-choice failure at all -- the agent has no store name available to it. Every confirmed instance goes through search_products, whose SPEC-3 contract returns only {product_id, store_id, title, price_usd}. get_order's contract already includes store_name, so a trace built entirely from get_order would not belong here even if it also mentioned a store_id incidentally.",
+      "root_cause": "search_products (TOOL-3) never returns a store name, only store_id (confirmed against both SPEC.md's contract table and agent/tools.py's actual docstring/return shape). The reply cannot show a name it was never given, so it either exposes the raw id (what happens in all 6 traces) or omits store info entirely. Not an agent decision-making failure -- a tool contract gap.",
+      "evaluator_type": "code",
+      "evaluator_note": "Detect a bare numeric store identifier pattern (e.g. \"Store N\", \"Store #N\") in a reply that describes a search_products result, where SPEC now requires a name to be available instead.",
+      "requirement_source": "TOOL-12 (new -- added to SPEC.md, motivated by support-0083/0085/0165/0167/0197/0200; requires search_products to return store_name the same way get_order already does).",
+      "known_gaps": "No close negative yet -- would need a search_products-based reply that already has a store name available (not possible under the current tool contract) or a get_order-based reply that correctly used the name. Not searched for in this pass."
+    },
+    {
+      "name": "premature_help_lookup",
+      "definition": "After a vague opening request that does not specify what kind of help is needed, the agent calls search_help_center and/or get_policy on an assumed topic (usually refund/return eligibility) instead of asking a clarifying question first.",
+      "status": "confirmed",
+      "count": 3,
+      "example_trace_ids": [
+        "ea95b1b9c68f8d9902cdf1c6be9a577d",
+        "914a1ae982f4083181ab49f1bfe75b46",
+        "51e9a99182a23017076ed6a9be3fdde2"
+      ],
+      "close_negative_trace_ids": [
+        "95743d69e4b799a175d2984b18c94444",
+        "96a9fbbbd659c54b1370f5555467d4f0"
+      ],
+      "created_from": [
+        "ea95b1b9c68f8d9902cdf1c6be9a577d",
+        "914a1ae982f4083181ab49f1bfe75b46",
+        "51e9a99182a23017076ed6a9be3fdde2"
+      ],
+      "origin_scenario_ids": ["support-0003", "support-0005", "support-0009"],
+      "example_quotes": [
+        "user trails off without stating a need (\"...Anyway\"); agent immediately searches \"return refund policy defective product\" (support-0003)",
+        "\"I need this resolved\" (no specifics); agent immediately investigates refund eligibility (support-0005)",
+        "\"Need assistance\" (no specifics); agent explains the return window closed without ever asking what was needed (support-0009)"
+      ],
+      "boundary": "The close negatives (support-0001, support-0002) show the exact same triggering condition -- a vague opening request -- handled correctly: both ask a clarifying question (\"What do you need help with?\") instead of assuming. support-0002's reply separately oversteps by volunteering \"would you like to return it?\" as an option, but that is reply-content overreach (unsolicited_reply_content), not a premature tool call, so it still counts as a close negative here even though it is not a clean pass overall.",
+      "evaluator_type": "judge",
+      "evaluator_note": "A code check could flag search_help_center/get_policy calls before any user message contains refund/return/policy-adjacent keywords as a first-pass heuristic, but judging whether the opening request was genuinely ambiguous (vs. reasonably implying a topic) needs a judge.",
+      "requirement_source": "RESP-6 (new -- added to SPEC.md, motivated by support-0003/support-0005/support-0009: ask a clarifying question before assuming a specific need and investigating policy on that assumption).",
+      "known_gaps": "Only 2 close negatives found so far (handout prefers 3 when the data permits); not searched further in this pass."
+    },
+    {
+      "name": "dispute_window_not_checked_against_current_date",
+      "definition": "The reply computes or cites a dispute-window deadline (delivery date plus the dispute policy's day count) without comparing it to the current date, and either presents it as an available option, hedges it as a dangling conditional (\"if you're still within that window\"), or asserts it is still open, when the deadline has actually passed.",
+      "status": "confirmed",
+      "count": 12,
+      "example_trace_ids": [
+        "17626f7dfca696a7720dd90b0e26e628",
+        "50ea04d99ea0f5507797e911fcaa524d",
+        "5b8f2f02cebcddb687646d73428bb57a",
+        "ac382d34d40587df5f6f0e2ad7a70dca",
+        "f4a63154598e68a2dac76073f1d0ba8b",
+        "02dc3bcc623e58b819fae08c91479d24",
+        "607f5d1fd9c394989ce7d0bb46c73449",
+        "6631bec376c1070247afc3895349b37f",
+        "1dc75146dcb68206f7c0d3cd0228ecbc",
+        "c0d170f58b4fba515146cdd0bf3ff1cb",
+        "582a40ba33ea8531418a1213d6f84397",
+        "d9370b3786e6a309afd348cbfb896935"
+      ],
+      "close_negative_trace_ids": [
+        "80897d7d2e5ff9a2fe768ab4ff242f0e",
+        "768eb97cc65a3abfbd3046b1e60b00b0",
+        "02b928ad4f66a53600ee939f7162343c"
+      ],
+      "created_from": [
+        "17626f7dfca696a7720dd90b0e26e628",
+        "50ea04d99ea0f5507797e911fcaa524d",
+        "5b8f2f02cebcddb687646d73428bb57a",
+        "ac382d34d40587df5f6f0e2ad7a70dca",
+        "f4a63154598e68a2dac76073f1d0ba8b",
+        "02dc3bcc623e58b819fae08c91479d24",
+        "607f5d1fd9c394989ce7d0bb46c73449",
+        "6631bec376c1070247afc3895349b37f",
+        "1dc75146dcb68206f7c0d3cd0228ecbc",
+        "c0d170f58b4fba515146cdd0bf3ff1cb",
+        "582a40ba33ea8531418a1213d6f84397",
+        "d9370b3786e6a309afd348cbfb896935"
+      ],
+      "origin_scenario_ids": [
+        "support-0238", "support-0150", "support-0027", "support-0216",
+        "support-0091", "support-0212", "support-0045", "support-0087",
+        "support-0214", "support-0215", "support-0217", "support-0241"
+      ],
+      "example_quotes": [
+        "\"so you'd still be within that window\" -- confidently wrong, dispute deadline passed over a year earlier (support-0091)",
+        "\"If you're still within that window, I can escalate...\" -- dangling conditional, never resolved (support-0238)",
+        "dispute deadline named as a live date (\"until around December 21, 2025\") with no comparison to the request date (support-0087)"
+      ],
+      "boundary": "The close negatives show the correct behavior at two different points: support-0153 computes both the return and dispute deadlines and explicitly concludes \"the 60-day dispute window... has also passed\" -- resolves the check rather than dangling it. support-0039 honestly hedges (\"may also have passed depending on today's date\") instead of asserting availability. support-0178 escalates because the delivery date is missing entirely, a genuine data gap rather than an unresolved-but-known date (RESP-3), and is a related but distinct good behavior. Distinct from overstates_write_status: that mode is about language overstating a pending human-approval decision that has already been initiated; this mode is about a computed calendar deadline never being checked against the current date at all.",
+      "evaluator_type": "judge",
+      "evaluator_note": "Recompute the deadline (delivered_at + applicable dispute-window days) against the trace/request timestamp -- a deterministic date check -- then judge whether the reply's phrasing asserts, hedges, or correctly resolves the window's status. The date math alone is code-checkable; classifying the reply's phrasing needs a judge.",
+      "requirement_source": "RESP-7 (new -- added to SPEC.md, motivated by the 12 confirmed instances above; no existing RESP requirement covered comparing a computed deadline to the current date).",
+      "known_gaps": "support-0033 is a borderline case (cites the dispute policy generically without asserting current window status either way) -- left out of the confirmed count as too ambiguous, not discarded."
+    },
+    {
+      "name": "unsolicited_reply_content",
+      "definition": "The reply adds content beyond what accurately and minimally answers the caller's actual request: casual or celebratory tone words (\"Great find!\", \"Done!\") for a routine or bad-news outcome, or an unprompted suggestion of a specific next action (e.g. \"would you like to return it?\") before the caller has indicated that is what they want.",
+      "status": "confirmed",
+      "count": 7,
+      "example_trace_ids": [
+        "96a9fbbbd659c54b1370f5555467d4f0",
+        "d6b6d33b31ef3425b75568e5e7950305",
+        "74926489f88ceafede65292f53f9bb4a",
+        "9968e13716430def1f82aa9bfd9718d8",
+        "851d5f2895b8060df5eff6b23050c65c",
+        "2cdc4b8a20235bc0ad0ca72451625986",
+        "04eff4bd240372db5dffea9c78c71649"
+      ],
+      "close_negative_trace_ids": [
+        "95743d69e4b799a175d2984b18c94444",
+        "9e67b3ea8e0bc18723d7ce9741c17e14"
+      ],
+      "created_from": [
+        "96a9fbbbd659c54b1370f5555467d4f0",
+        "d6b6d33b31ef3425b75568e5e7950305",
+        "74926489f88ceafede65292f53f9bb4a",
+        "9968e13716430def1f82aa9bfd9718d8",
+        "851d5f2895b8060df5eff6b23050c65c"
+      ],
+      "origin_scenario_ids": ["support-0002", "support-0056", "support-0089", "support-0185", "support-0213", "support-0030", "support-0187"],
+      "example_quotes": [
+        "\"...or would you like to return it?\" volunteered before the caller said anything was wrong (support-0002)",
+        "\"Great find!\" opening a reply about a store's return-window override (support-0056)",
+        "\"Done!\" opening a ticket-creation reply (support-0089, support-0185)",
+        "\"...and unfortunately it's not great news\" (support-0213)"
+      ],
+      "boundary": "The close negatives (support-0001, support-0004) show the same kind of vague or open-ended situation handled with plain, neutral language and a direct clarifying question, no tone flourish and no volunteered next action. Distinct from premature_help_lookup: that mode is about assuming a topic and running a tool call before asking; this mode is about word choice and unprompted suggestions in an otherwise appropriately-scoped reply.",
+      "evaluator_type": "judge",
+      "evaluator_note": "Both the tone-word and unprompted-suggestion variants require semantic judgment of the reply text; no reliable keyword list covers this.",
+      "requirement_source": "RESP-5 (existing -- \"use direct and respectful language\" implicitly excludes celebratory tone words for bad-news outcomes and unprompted suggestions beyond the direct decision being explained; no new SPEC revision needed).",
+      "known_gaps": "Only 2 close negatives (handout prefers 3 when the data permits); not searched further for close negatives specifically.",
+      "search_history": "selection.next_candidates(strategy='enrich') against the 5 original confirmed instances returned 8 candidates (see suggestions.json). 2 accepted (support-0030, support-0187, both matching the confirmed tone pattern) and 6 rejected: support-0126 (wrong domain -- a general merchant policy question, not a refund interaction), support-0180 (the opposite of a violation -- correctly flags a genuine data inconsistency and escalates, RESP-3 territory), support-0247/support-0066 (clean, neutral replies with only conditional escalation offers), support-0036 and support-0250 (borderline, weaker than the confirmed threshold). Bag-of-words similarity is imprecise for a stylistically-defined mode like this one, which is exactly why the rejections happened -- surface vocabulary overlap (\"return window\", \"escalate\") does not imply the same failure."
+    },
+    {
+      "name": "store_override_policy_not_cited",
+      "definition": "The reply cites the generic 30-day platform return window (or applies it silently) when discussing return/refund eligibility for an order from a store that has its own return-window override, instead of looking up and citing the store-specific policy.",
+      "status": "confirmed",
+      "count": 3,
+      "example_trace_ids": [
+        "5de6857edd07736ff8692fb07c5163fe",
+        "454f8e151e47768bf7f80c5271799dad",
+        "17626f7dfca696a7720dd90b0e26e628"
+      ],
+      "close_negative_trace_ids": [
+        "8d45ac4f5ee2aca62d58153e09ea94d1",
+        "fd44f339b740e5a64f3c60cfa9954bc2",
+        "5d97d2e07e831d6d8a95a317af26ee98",
+        "a8a4e19aa78d0003a43f6d39aa3247e8"
+      ],
+      "created_from": [
+        "5de6857edd07736ff8692fb07c5163fe",
+        "17626f7dfca696a7720dd90b0e26e628"
+      ],
+      "origin_scenario_ids": ["support-0113", "support-0239", "support-0248"],
+      "example_quotes": [
+        "\"Per Cartwheel's return policy (cw-returns), items can be returned within 30 days\" for a Saltbox Pantry order (actual override: 7 days) (support-0113)",
+        "\"the 30-day return window has passed\" for a Northwind Books order (actual override: 45 days) (support-0248)"
+      ],
+      "boundary": "Discovered via a full-corpus scan (24 traces touching a store with an override and discussing return/refund/window): 10 correctly cited the override, 3 wrongly cited the 30-day default, 11 made no explicit day-count claim (not evidence either way). In all 3 confirmed instances, so much time had passed that the final eligibility conclusion was unaffected by the error (e.g. support-0113: correct 7-day deadline June 7 2025 vs. the wrongly-cited June 30 2025 deadline -- a 23-day gap that happened not to matter here, but would flip the outcome for an order delivered in that window). The defect is in the citation itself, independent of whether it changed the bottom-line decision. support-0239 is also evidence for overstates_write_status and refund_proceeds_past_eligibility_window -- one trace, three separate defects.",
+      "evaluator_type": "code",
+      "evaluator_note": "Look up the order's store_id in the stores table; if return_window_days_override is not null, check whether the reply's cited window (or the deadline math shown) matches the override rather than the 30-day platform default.",
+      "requirement_source": "RESP-1 (existing -- \"cite the policy identifier for every claim derived from a policy document\" is violated in substance when the cited policy is the wrong one for this store, even though a policy ID like cw-returns is technically named).",
+      "reviewed_history": "support-0113 was reviewed in batch 3 (before this mode was discovered) and marked \"no failure observed\" under the modes known at the time -- a genuine criteria-drift case per the skill's review-loop guidance, now re-flagged as a confirmed instance of this mode without erasing the original annotation."
+    },
+    {
+      "name": "cross_tenant_store_disclosure",
+      "definition": "The reply discloses the specific identity of a different store (not the caller's own) while investigating an order/catalog data inconsistency, to a caller who has no authorized visibility into that other store's data.",
+      "status": "candidate",
+      "count": 1,
+      "example_trace_ids": ["1c3e4364864b0cc9704d2b2d07fc1e66"],
+      "close_negative_trace_ids": [
+        "dc0530cc192052940eb5e7013a1c0560",
+        "e765be15384715ab0d64dcb734e704ae"
+      ],
+      "created_from": ["1c3e4364864b0cc9704d2b2d07fc1e66"],
+      "origin_scenario_ids": ["support-0189"],
+      "example_quotes": [
+        "\"that product actually belongs to store 14\" told to a merchant investigating their own store's order (support-0189)"
+      ],
+      "boundary": "support-0186 (shopper, same underlying order-mismatch case) correctly opens a ticket without naming the other store. support-0190 (support role, same case) correctly does name it -- support is authorized to see across the whole platform per AUTH-1, so disclosure to that role is not a violation. The mode is specifically about disclosure to an unauthorized party, not a blanket rule against ever naming a store. support-0133 (a merchant using search_products, which surfaces other stores by design) was considered and rejected -- that is the tool's normal designed behavior, not a leak.",
+      "evaluator_type": "judge",
+      "evaluator_note": "Needs the caller's role/scope and the disclosed party's identity to judge whether disclosure was authorized -- not a simple keyword check.",
+      "requirement_source": "RESP-4 (existing -- \"explain refusals and escalations without revealing inaccessible order or user information\"; extended here to a different store's identity, not just the caller's own inaccessible data).",
+      "known_gaps": "Only 1 confirmed instance after a semantic-similarity search across the unsampled pool; below the handout's minimum of 3 for a final mode. Recorded as a candidate, not promoted, per explicit decision not to force it into the taxonomy prematurely."
+    },
+    {
+      "name": "silent_order_substitution",
+      "definition": "After get_order returns permission_denied (the caller referenced an order they don't own), the agent silently substitutes a different order found via find_order and proceeds to act on it (e.g. escalate_to_human), without telling the caller that a substitution happened.",
+      "status": "candidate",
+      "count": 1,
+      "example_trace_ids": ["239752f09da0d2672090290fcc78003f"],
+      "close_negative_trace_ids": [
+        "9aeb4d0aa6255c729df3958e341da2fa",
+        "c1fbe50099a5239b433f80b0c912a347"
+      ],
+      "created_from": ["239752f09da0d2672090290fcc78003f"],
+      "origin_scenario_ids": ["support-0219"],
+      "example_quotes": [
+        "customer referenced order #342 (permission_denied); agent silently escalates on order #387 instead, found via find_order, without ever telling the customer (support-0219)"
+      ],
+      "boundary": "support-0218 shows the correct version of the exact same situation: finds a different matching order via find_order, then explicitly says \"I found a match on your account, but it's a different order number\" before proceeding. support-0220 correctly reports no match found at all rather than fabricating one. All other permission_denied traces in the corpus (10 of them) correctly refuse and stop without any substitution.",
+      "evaluator_type": "judge",
+      "evaluator_note": "Needs to detect a permission_denied result followed by a different order_id being acted on, and judge whether the reply disclosed the substitution to the caller.",
+      "requirement_source": "RESP-3 (existing -- \"state when required information is missing or inconsistent, rather than inventing a value\"; silently substituting an order is a form of inventing/assuming rather than stating the inconsistency).",
+      "known_gaps": "Only 1 confirmed instance after checking all 15 permission_denied traces in the full corpus; below the handout's minimum of 3 for a final mode. Recorded as a candidate, not promoted."
+    }
+  ]
+}

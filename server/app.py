@@ -32,6 +32,7 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator
 
+import raindrop.analytics as raindrop
 from agents import Runner, RunConfig, SQLiteSession
 from fastapi import FastAPI, Header, HTTPException
 from opentelemetry import trace
@@ -53,6 +54,11 @@ _tracer = trace.get_tracer("cartwheel.server")
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     load_env()
     setup_tracing()  # no-op with a warning if LANGFUSE_PUBLIC_KEY is unset
+    # HW4 Part C (Raindrop Workshop): tracing_enabled stays False so this
+    # never touches OpenTelemetry or competes with the tracer provider
+    # Langfuse already registered above; api_key=None keeps this local-only
+    # (mirrors to the Workshop daemon at localhost:5899, never the cloud).
+    raindrop.init(api_key=None, tracing_enabled=False)
     yield
 
 
@@ -210,14 +216,30 @@ async def post_message(
                     ),
                 )
 
-        result = await Runner.run(
-            agent,
-            body.message,
-            session=session,
-            context=ctx,
-            max_turns=MAX_TURNS,
-            run_config=RunConfig(tracing_disabled=False),
+        interaction = raindrop.begin(
+            event="cartwheel.session_message",
+            user_id=str(ctx.user_id),
+            input=body.message,
+            convo_id=session_id,
+            properties={
+                "role": ctx.role,
+                "prompt_version": version,
+                "scenario_id": body.scenario_id,
+            },
         )
+        try:
+            result = await Runner.run(
+                agent,
+                body.message,
+                session=session,
+                context=ctx,
+                max_turns=MAX_TURNS,
+                run_config=RunConfig(tracing_disabled=False),
+            )
+        except Exception as exc:
+            interaction.finish(output=f"Error: {exc}")
+            raise
+        interaction.finish(output=result.final_output)
 
         if span.is_recording() and capture_content:
             span.set_attribute(

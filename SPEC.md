@@ -92,6 +92,10 @@ Successful results contain `ok: true` and the result fields. Expected failures c
 | `escalate_to_human` | `ticket_id` and `sla_hours` after creating the support ticket. | Execution exception if ticket creation fails. |
 | `get_refund_status` | `order_id`, `refund_id`, `amount_usd`, `status` (`auto_approved` or `queued_for_approval`), and `created_at` for the order's most recent refund record, read from the refunds table directly rather than the order's summary status (RESP-2: the order's `status` field can still say `refunded` while its refund is `queued_for_approval`). Access scope matches `get_order`. | `not_found` for an unknown order or an order with no refund on file; `permission_denied` for an order outside the caller's scope. |
 
+**TOOL-11.** The refund eligibility that `get_order` reports, and that `issue_refund` and `cancel_order` enforce, must reflect the applicable return-window rule evaluated against the current date at request time. It must not be a value computed once and stored when the order record was created or seeded, since that value goes stale as real time passes without ever being refreshed. An order delivered further in the past than the applicable return-window days (the platform default, or a store override) is not eligible, regardless of what a precomputed flag says.
+
+**TOOL-12.** `search_products` results must include the store name alongside `store_id`, the same way `get_order`'s contract already does. A reply describing a search result must not have to choose between exposing a raw internal identifier and inventing a name it was never given.
+
 ## 5. Escalation policy
 
 The following cases always go to a human:
@@ -111,3 +115,5 @@ Requirements that do not fit in the sections above, including tone and style gui
 - **RESP-3.** State when required information is missing or inconsistent, rather than inventing a value.
 - **RESP-4.** Explain refusals and escalations without revealing inaccessible order or user information.
 - **RESP-5.** Use direct and respectful language that explains the relevant decision.
+- **RESP-6.** When the caller's message does not specify what kind of help is needed, ask a clarifying question before assuming a specific action (such as checking refund or return eligibility) and investigating policy on that assumption.
+- **RESP-7.** When the agent computes a date-based deadline (such as a dispute window) from known order dates, it must compare that deadline to the current date and state plainly whether the window is open or has closed, rather than presenting an expired option as though it might still be available.

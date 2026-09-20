@@ -1,0 +1,21 @@
+{
+  "judge_id": "dispute_window_not_checked_against_current_date-v1",
+  "split": "dev",
+  "tpr": 1.0,
+  "tnr": 1.0,
+  "tpr_interval": [
+    0.9408,
+    1.0
+  ],
+  "tnr_interval": [
+    0.7847,
+    1.0
+  ],
+  "agreement": 1.0,
+  "tp": 61,
+  "fn": 0,
+  "tn": 14,
+  "fp": 0,
+  "n": 75,
+  "disagreements": []
+}

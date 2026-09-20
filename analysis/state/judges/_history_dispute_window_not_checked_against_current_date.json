@@ -1,0 +1,12 @@
+{
+  "versions": [
+    {
+      "judge_id": "dispute_window_not_checked_against_current_date-v0",
+      "prompt_hash": "3fdd70b8753b"
+    },
+    {
+      "judge_id": "dispute_window_not_checked_against_current_date-v1",
+      "prompt_hash": "b70822d4fe33"
+    }
+  ]
+}

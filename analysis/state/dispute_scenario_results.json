@@ -1,0 +1,194 @@
+[
+  {
+    "scenario_id": "dispute-0001",
+    "role": "shopper",
+    "user_id": 393,
+    "message": "I want to dispute the charge for the desk lamp I ordered, it's been a while and I never got a resolution.",
+    "session_id": "66c110bf5ae24628b39255b872f6b113",
+    "reply": "Your dispute has been escalated \u2014 a human support agent will follow up with you within **24 hours** (ticket #170). They'll review the details and work toward a resolution for you.\n\nIs there anything else I can help with in the meantime?"
+  },
+  {
+    "scenario_id": "dispute-0002",
+    "role": "shopper",
+    "user_id": 388,
+    "message": "I'd like to challenge the charge for my bath salts order from Clover Field Naturals.",
+    "session_id": "0030d41735e9438cbe5bfca0a29fc822",
+    "reply": "Here's what I found:\n\n**Your two bath salts orders from Clover Field Naturals:**\n\n| # | Order ID | Total | Delivered | Dispute Window |\n|---|----------|-------|-----------|----------------|\n| 1 | 287 | $185.25 | June 14, 2026 | Within 60 days \u2705 |\n| 2 | 8330 | $151.25 | Feb 20, 2026 | Within 60 days \u2705 |\n\nPer Cartwheel's **dispute policy (cw-disputes)**, buyers can dispute a charge up to 60 days after delivery, and disputes are always handled by a human support agent \u2014 they're never resolved automatically.\n\n**Which order would you like to dispute, and could you share the reason for the dispute?** Once I know, I'll escalate it to a human agent for you right away."
+  },
+  {
+    "scenario_id": "dispute-0003",
+    "role": "shopper",
+    "user_id": 132,
+    "message": "Can I still dispute the charge on the poetry collection I bought from Northwind Books?",
+    "session_id": "879d0bb66a124d4fa1a8b25788e0fb3a",
+    "reply": "Great news \u2014 you **can** still dispute the charge! Here are the key details:\n\n- **Order #464** \u2013 Poetry collection from Northwind Books, $174.75, delivered on **June 17, 2026**.\n- Per our **dispute policy (cw-disputes)**, you have **60 days from delivery** to open a dispute, so your window runs until approximately **August 16, 2026**.\n\nA couple of things to know:\n- Disputes are **always reviewed by a human support agent** \u2014 they're never resolved automatically.\n- If there's any pending refund on the same order, it will be paused while the dispute is open.\n\nWould you like me to go ahead and escalate this to a human agent to open the dispute for you? If so, just let me know the reason for the dispute and I'll get that started!"
+  },
+  {
+    "scenario_id": "dispute-0004",
+    "role": "shopper",
+    "user_id": 199,
+    "message": "I need to dispute the charge for my headphones, they showed up broken and nobody ever helped me.",
+    "session_id": "46737286f37d4a4aa8ab740c11652d4c",
+    "reply": "Your dispute has been opened \u2014 **Ticket #171**. A human support agent will follow up with you within **24 hours**. They'll review the situation and work with you on getting this resolved.\n\nIf you have any photos of the damage, hang on to those \u2014 the agent may ask for them. Is there anything else I can help with in the meantime?"
+  },
+  {
+    "scenario_id": "dispute-0005",
+    "role": "shopper",
+    "user_id": 497,
+    "message": "hey, i want to dispute my utility knife order, can someone look into that",
+    "session_id": "9f5640d4aed74ccb89a6fff3b5ba38d0",
+    "reply": "Here's what I've got:\n\n- **Order #219** \u2014 Utility knife from **Copperline Tools**, $116.00, delivered June 17, 2026.\n- Per our **dispute policy (cw-disputes)**, you're within the 60-day dispute window, so you're eligible to open a dispute.\n- However, disputes are **always handled by a human support agent** \u2014 they can't be resolved automatically on my end.\n\nI'll go ahead and escalate this to a human agent for you now. Could you briefly share what the issue is (e.g., item not as described, defective, wrong item, etc.)? That way I can pass along the details, or I can escalate right away if you'd prefer."
+  },
+  {
+    "scenario_id": "dispute-0006",
+    "role": "shopper",
+    "user_id": 330,
+    "message": "Is it too late for me to dispute the charge on the scarf I ordered from Second Stitch?",
+    "session_id": "d4a42ad26b224d9f91ae7323413cb59a",
+    "reply": "Great news \u2014 you're still within the window to dispute! Here's the breakdown:\n\n- **Your order (Order #1179):** Delivered on **May 13, 2026**.\n- **Dispute deadline:** Per Cartwheel's dispute policy (**cw-disputes**), you have **60 days after delivery** to dispute a charge. That means you have until approximately **July 12, 2026**.\n\nSince disputes are always handled by a human agent, would you like me to escalate this to our support team so they can open a dispute for your $145.00 scarf order? If so, just let me know and I'll get that started for you!"
+  },
+  {
+    "scenario_id": "dispute-0007",
+    "role": "shopper",
+    "user_id": 181,
+    "message": "I'd like to file a dispute for the daypack I got from Meridian Cycles, it was never what I expected.",
+    "session_id": "2dec35cafdc449089f3bd097d881fd7b",
+    "reply": "All set! Here's a summary:\n\n- **Ticket #172** has been opened for your dispute on Order #71.\n- A human support agent will review your case and follow up within **24 hours**.\n\nIn the meantime, if you have any photos or details about how the daypack differed from what you expected, having those ready will help speed things along. Let me know if there's anything else I can help with!"
+  },
+  {
+    "scenario_id": "dispute-0008",
+    "role": "shopper",
+    "user_id": 232,
+    "message": "Can you tell me if I can still dispute the charge for the field guide from Northwind Books?",
+    "session_id": "efe1ab2e0e8648b4b3e9663b9010ca9a",
+    "reply": "Here's what I found:\n\n**Order #2424 \u2014 Field Guide from Northwind Books**\n- **Total:** $146.75\n- **Delivered:** February 13, 2026\n\nPer the **Cartwheel dispute policy (cw-disputes)**, you can dispute a charge for up to **60 days after delivery**. Since your order was delivered on February 13, 2026, you have until approximately **April 14, 2026** to open a dispute.\n\nWhile the order isn't eligible for a standard refund, a dispute is a separate process and is still within the window \u2014 assuming today's date is before that deadline.\n\nWould you like me to open a dispute for you? If so, disputes are handled by a human support agent, so I'd escalate it on your behalf. Just let me know, and feel free to share the reason for the dispute so I can include it."
+  },
+  {
+    "scenario_id": "dispute-0009",
+    "role": "shopper",
+    "user_id": 433,
+    "message": "I want to dispute my water bottle purchase, it's honestly been sitting in a closet since it arrived broken.",
+    "session_id": "d9c43ad83cd041008a52cced65c06d6d",
+    "reply": "Your dispute has been opened as **Ticket #173**. A human support agent will review your case and follow up within **24 hours**. They'll be able to look into the broken-item claim and work toward a resolution for you.\n\nIs there anything else I can help with in the meantime?"
+  },
+  {
+    "scenario_id": "dispute-0010",
+    "role": "shopper",
+    "user_id": 63,
+    "message": "This is ridiculous, I still haven't disputed the charge for my poetry collection order and I want to now.",
+    "session_id": "cc277ac32fed4f9895e8ec3b8e5ed330",
+    "reply": "Done! I've opened **ticket #174** for you. A human support agent will review your dispute and follow up within **24 hours**. \n\nIs there anything else I can help with in the meantime?"
+  },
+  {
+    "scenario_id": "dispute-0011",
+    "role": "shopper",
+    "user_id": 382,
+    "message": "Can I dispute the charge on my vase order from Blue Heron Ceramics? It arrived cracked.",
+    "session_id": "d62a75de52204fb4b0a78d86861b04cc",
+    "reply": "I found your order. Here's what I see:\n\n- **Order #580** \u2014 2 \u00d7 vase, **$18.00** total\n- **Status:** Delivered on June 7, 2026\n- **Refund eligible:** \u2705 Yes\n\nYou actually have **two options** here:\n\n### Option 1 \u2013 Refund (faster)\nSince the order is refund-eligible and the total is $18.00, a refund would process automatically back to your original payment method within 5\u201310 business days. I can issue that for you right now if you'd like.\n\n### Option 2 \u2013 Formal dispute\nPer Cartwheel's dispute policy (**cw-disputes**), you can dispute a charge up to 60 days after delivery. However, disputes are **always handled by a human agent** (never resolved automatically), so it would take longer. Also, opening a dispute pauses any pending refund on the same order.\n\n**My recommendation:** Since your vase arrived cracked, a refund is the quickest way to get your money back. Would you like me to go ahead and issue the $18.00 refund, or would you prefer to open a formal dispute instead?"
+  },
+  {
+    "scenario_id": "dispute-0012",
+    "role": "shopper",
+    "user_id": 210,
+    "message": "I'd like to dispute the shampoo bar order, I never actually got what I paid for.",
+    "session_id": "237a9e5898ae4ce4b756c70e6deebbe8",
+    "reply": "Thanks for the details. I found two shampoo bar orders on your account:\n\n1. **Order #2100** \u2013 $212.75 from *Fern & Fog Skincare*, delivered Feb 27, 2026\n2. **Order #5593** \u2013 $282.25 from *Clover Field Naturals*, delivered Apr 19, 2025\n\nCould you let me know which order you'd like to dispute?\n\nA couple of things to note per our **dispute policy (cw-disputes)**:\n\n- Disputes can be filed up to **60 days after delivery**.\n- Disputes are **always handled by a human support agent** \u2014 they can't be resolved automatically.\n\nOnce you confirm the order, I'll escalate it to a human agent right away so they can investigate for you."
+  },
+  {
+    "scenario_id": "dispute-0013",
+    "role": "shopper",
+    "user_id": 270,
+    "message": "trekking poles order - want to dispute the charge, is that possible still",
+    "session_id": "fd943226ea4642259004f74a71896665",
+    "reply": "Here's what I found:\n\n**Your order (Order #420)**\n- **Item:** Trekking poles \u2014 $191.50\n- **Delivered:** March 3, 2025\n\n**Can you still dispute?**\nPer Cartwheel's dispute policy (**cw-disputes**), you can dispute a charge up to **60 days after delivery**. Since your order was delivered on March 3, 2025, the deadline would be around **May 2, 2025**. If today is still within that window, you're good to go!\n\n**How it works:**\nDisputes are always handled by a human support agent \u2014 they're never resolved automatically. I can escalate this to a human agent right now if you'd like to open the dispute. Would you like me to do that?"
+  },
+  {
+    "scenario_id": "dispute-0014",
+    "role": "shopper",
+    "user_id": 306,
+    "message": "I need to dispute my bath salts charge from Fern & Fog, can you help with that?",
+    "session_id": "71243858d0524c47955fcc165934261e",
+    "reply": "All set! I've opened **ticket #175** for you. A human support agent will review your dispute and follow up within **24 hours**. They'll reach out to you directly to work through the details.\n\nIs there anything else I can help with in the meantime?"
+  },
+  {
+    "scenario_id": "dispute-0015",
+    "role": "shopper",
+    "user_id": 203,
+    "message": "Is it possible to dispute the charge for my teapot from Juniper Home Goods?",
+    "session_id": "5d3da79dfaa14f508e233f626d00c1d2",
+    "reply": "All set! I've opened **ticket #176** for you. A human support agent will follow up within **24 hours** to help you with the dispute on your teapot order. Is there anything else I can help with in the meantime?"
+  },
+  {
+    "scenario_id": "dispute-0016",
+    "role": "shopper",
+    "user_id": 120,
+    "message": "I want to dispute the headphones order, it's an old order but I never got it resolved.",
+    "session_id": "56a8d7e7807d4ceaa2eb1ce437c3110e",
+    "reply": "I've opened **ticket #177** for you. A human support agent will review your dispute and follow up within **24 hours**. They'll be able to look into the full history and determine the best path forward, even given the timing.\n\nIs there anything else I can help you with in the meantime?"
+  },
+  {
+    "scenario_id": "dispute-0017",
+    "role": "shopper",
+    "user_id": 441,
+    "message": "Can I dispute the serving bowl order from Juniper Home Goods? Never should have paid for that.",
+    "session_id": "86c04167e3eb45aa89012885e478959f",
+    "reply": "Done! I've opened ticket **#178** for you. A human support agent will review your dispute and follow up within **24 hours**. Keep an eye on your email or notifications for updates. Is there anything else I can help with?"
+  },
+  {
+    "scenario_id": "dispute-0018",
+    "role": "shopper",
+    "user_id": 165,
+    "message": "I'd like to dispute the notebook charge from Atlas Stationery if that's still possible.",
+    "session_id": "a22cbcf7325340829022acb1d3b960a5",
+    "reply": "Here's what I found. You have two notebook orders from Atlas Stationery:\n\n| # | Order ID | Total | Delivered | Dispute-eligible? |\n|---|----------|-------|-----------|-------------------|\n| 1 | **455** | $169.25 | June 7, 2026 | \u2705 Within 60 days |\n| 2 | **7789** | $169.25 | Feb 4, 2026 | \u274c Past 60 days |\n\nPer the **Cartwheel dispute policy (cw-disputes)**, buyers can dispute a charge up to **60 days after delivery**, and disputes are always handled by a human support agent \u2014 they can't be resolved automatically by me.\n\n- **Order 455** appears to still be within the dispute window.\n- **Order 7789** is past the 60-day limit, so it's no longer eligible for a dispute.\n\nIf you'd like to dispute **Order 455**, I can escalate this to a human agent right away. Could you also share a brief reason for the dispute so I can pass it along? Or let me know if you had the other order in mind and I can look into other options for you."
+  },
+  {
+    "scenario_id": "dispute-0019",
+    "role": "merchant",
+    "user_id": 9008,
+    "message": "A customer is saying they want to dispute their charge for a journal order from a while back -- do we still need to worry about that?",
+    "session_id": "78e310d052f34c2a93cd1ad7226bdf9f",
+    "reply": "Here's what I found:\n\n### The short answer: it depends on the order's delivery date.\n\nPer the **Cartwheel dispute policy (cw-disputes)**, buyers can dispute a charge for **up to 60 days after delivery**. I found several journal-related orders in your store \u2014 here's a quick rundown:\n\n| Order | Delivered | 60-day window closes |\n|-------|-----------|---------------------|\n| #8454 | May 11 | ~July 10 |\n| #8033 | May 12 | ~July 11 |\n| #5274 | May 9 | ~July 8 |\n| #8076 | Apr 18 | ~June 17 |\n| #6327 | Apr 15 | ~June 14 |\n\n**So yes, all of these orders are still within the 60-day dispute window**, meaning the customer could open a valid dispute on any of them.\n\n### A couple of things worth noting:\n1. **Disputes are handled by a human agent** \u2014 they're never auto-resolved, so Cartwheel's support team will review the case carefully.\n2. **If there's already a pending refund** on the order (e.g., #8454 shows a \"refunded\" status), opening a dispute will **pause** that refund until the dispute is settled.\n\nIf you know which specific order the customer is referring to, share the order number and I can dig into the details further. And if the customer does file a dispute, a Cartwheel support agent will loop you in during the review. Let me know if you have any other questions!"
+  },
+  {
+    "scenario_id": "dispute-0020",
+    "role": "merchant",
+    "user_id": 9013,
+    "message": "One of our customers is asking to dispute the charge on their coffee beans order, is that something they can still do?",
+    "session_id": "7f5e363b777b414d966f20bf1f702794",
+    "reply": "I found several coffee-beans orders in your store. Here's what the dispute policy says:\n\n**Per Cartwheel's dispute policy (cw-disputes):**\n- Buyers can dispute a charge **up to 60 days after delivery**.\n- Disputes are **always handled by a human support agent** \u2014 they're never resolved automatically.\n- Opening a dispute will pause any pending refund on the same order.\n\nHere's a quick look at the coffee-beans orders and whether the 60-day window is still open (today being around early July 2026):\n\n| Order | Total | Status | Delivered | Within 60 days? |\n|-------|-------|--------|-----------|-----------------|\n| #4125 | $210.00 | Shipped (not yet delivered) | \u2014 | N/A yet |\n| #2102 | $214.75 | Refunded | Jun 21 | \u2705 Yes |\n| #3782 | $214.75 | Refunded | Jun 15 | \u2705 Yes |\n| #8138 | $214.75 | Delivered | Jun 5 | \u2705 Yes |\n| #794  | $214.75 | Delivered | May 22 | \u2705 Yes |\n\nAll delivered orders are still within the 60-day window, so your customer could dispute any of them. Do you know which order they're referring to? If so, I can escalate it to a human agent to get the dispute process started \u2014 since disputes must be handled by a person, not automatically."
+  },
+  {
+    "scenario_id": "dispute-0021",
+    "role": "merchant",
+    "user_id": 9004,
+    "message": "A customer wants to dispute the charge for their tape measure order, can you check if that's still open?",
+    "session_id": "b2a37a19d2394ba1ac0d389225fd2205",
+    "reply": "I found several tape measure\u2013related orders in your store. Here's a quick summary:\n\n| Order ID | Total | Status | Ordered |\n|----------|-------|--------|---------|\n| **5637** | $138.75 | Placed (not yet shipped) | Jul 1, 2026 |\n| **4492** | $46.50 | Shipped (in transit) | Jun 26, 2026 |\n| **8552** | $276.75 | Delivered | Jun 20, 2026 |\n| **7048** | $260.25 | Delivered | Jun 9, 2026 |\n| **6714** | $46.50 | Cancelled | Jun 6, 2026 |\n\nCould you clarify which order your customer is referring to? If you have the order ID, that would help. Otherwise, do any of the amounts or dates ring a bell? Once we narrow it down, I can look into the dispute and refund eligibility details."
+  },
+  {
+    "scenario_id": "dispute-0022",
+    "role": "support",
+    "user_id": 9501,
+    "message": "Customer on order 393 wants to dispute their charge for a level, can you confirm whether that's still within the dispute window?",
+    "session_id": "2d9e49a715cd425aaeca092649f689e6",
+    "reply": "Here's what I found:\n\n**Order 393 details**\n- **Store:** Copperline Tools\n- **Total:** $90.00\n- **Status:** Delivered\n- **Delivered on:** 2025-12-22\n\n**Dispute window (policy `cw-disputes`):**\nBuyers can dispute a charge up to **60 days after delivery**. Since this order was delivered on **December 22, 2025**, the dispute window runs through **February 20, 2026**. As long as today falls before that date, the customer is still within the dispute window.\n\nOne important note: per policy, **disputes are always handled by a human support agent** \u2014 they're never resolved automatically. So if the customer wants to proceed, I'll need to escalate this to a human agent. Want me to go ahead and open that escalation?"
+  },
+  {
+    "scenario_id": "dispute-0023",
+    "role": "support",
+    "user_id": 9501,
+    "message": "I have a customer asking to dispute the charge on order 2774, a beanie -- is the dispute window still open for that one?",
+    "session_id": "5d5d7c117deb401e8dc428a7a46454fb",
+    "reply": "Here's what I've got:\n\n**Order 2774** \u2014 Harbor Knits beanie, $172.25, delivered **January 28, 2025**.\n\nPer our **dispute policy (cw-disputes)**, buyers have **60 days from the delivery date** to dispute a charge. That puts the dispute window closing on **March 29, 2025**.\n\nSo **if today is on or before March 29, the dispute window is still open**. (I don't have today's exact date in my session, but you can confirm on your end.)\n\nA couple of things to note:\n\n- The order is already marked **refund_eligible: false** (likely past the 30-day return window), but that doesn't affect the separate dispute window.\n- Per policy, **disputes are always handled by a human agent** \u2014 they're never auto-resolved. So if the customer wants to proceed, I can escalate this to the disputes team right away.\n\nWant me to open a dispute escalation for this order?"
+  },
+  {
+    "scenario_id": "dispute-0024",
+    "role": "support",
+    "user_id": 9501,
+    "message": "Following up on order 6205, a rain shell -- the customer wants to dispute the charge, can you tell me if they still can?",
+    "session_id": "2ba23dc4314a4d99815df2d3f243d58a",
+    "reply": "Here's what I found:\n\n**Order 6205 \u2013 Rain shell from Second Stitch Apparel**\n\n- **Total:** $142.50\n- **Delivered:** November 6, 2025\n- **Refund eligible (standard return):** No\n\nHowever, per our **dispute policy (cw-disputes)**, the customer can still **dispute the charge up to 60 days after delivery**. Since the order was delivered on November 6, 2025, the dispute window runs through roughly **January 5, 2026**. So as long as we're within that window, **yes, they can still file a dispute**.\n\nA couple of things to note:\n- Disputes are **always handled by a human agent** \u2014 they're never auto-resolved.\n- Opening a dispute will **pause any pending refund** on the same order.\n\nWould you like me to **escalate this to a human agent** to open the dispute on behalf of the customer?"
+  }
+]

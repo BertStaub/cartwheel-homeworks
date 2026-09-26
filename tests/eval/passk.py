@@ -1,7 +1,8 @@
 """pass@k, pass^k, and the CI result for one case (Module 3, Lecture 1.3).
 
 Your agent samples, so a single end-to-end run is a noisy measurement. These
-three functions turn k runs of one evaluation case into a signal and a decision:
+three functions turn n observed runs of one evaluation case into a signal and a
+decision:
 
   - :func:`pass_at_k` answers the capability question: can the agent EVER get
     this right? It rises with k.
@@ -57,8 +58,13 @@ def pass_at_k(n: int, c: int, k: int) -> float:
         pass_at_k(8, 6, 4) == 1.0  (only 2 failures, so every 4-subset hits
                                     a success)
     """
-    ### YOUR CODE HERE (hw6)
-    raise NotImplementedError("hw6: implement pass_at_k")
+    if n < 1 or not (0 <= c <= n) or not (1 <= k <= n):
+        raise ValueError(
+            f"invalid pass@k arguments: n={n}, c={c}, k={k} "
+            "(need n >= 1, 0 <= c <= n, 1 <= k <= n)"
+        )
+    failures = n - c
+    return 1 - comb(failures, k) / comb(n, k)
 
 
 def pass_hat_k(n: int, c: int, k: int) -> float:
@@ -89,23 +95,27 @@ def pass_hat_k(n: int, c: int, k: int) -> float:
         pass_hat_k(8, 6, 4) == C(6,4)/C(8,4) == 15/70 == 0.2142857...
         pass_hat_k(8, 6, 8) == 0.0  (not all 8 succeeded)
     """
-    ### YOUR CODE HERE (hw6)
-    raise NotImplementedError("hw6: implement pass_hat_k")
+    if n < 1 or not (0 <= c <= n) or not (1 <= k <= n):
+        raise ValueError(
+            f"invalid pass^k arguments: n={n}, c={c}, k={k} "
+            "(need n >= 1, 0 <= c <= n, 1 <= k <= n)"
+        )
+    return comb(c, k) / comb(n, k)
 
 
 def case_passes(
     kind: str,
     passes: int,
-    k: int,
+    n: int,
     baseline_pass_rate: float | None = None,
 ) -> dict[str, Any]:
-    """Return the CI decision for one evaluation case run k times.
+    """Return the CI decision for one evaluation case run n times.
 
     The evaluation case set holds two kinds of case:
 
       - A **regression** case guards a previously fixed bug. Its pinned
-        baseline is k of k, and it blocks the merge on ANY failed run
-        (`passes < k`). A rerun is allowed only for infrastructure errors
+        baseline is n of n, and it blocks the merge on ANY failed run
+        (`passes < n`). A rerun is allowed only for infrastructure errors
         (those never reach this function; see replay/harness.py), never for
         a verdict flip.
       - A **capability** case covers a core behavior the agent has never
@@ -115,8 +125,8 @@ def case_passes(
 
     Args:
         kind: "regression" or "capability".
-        passes: number of runs that passed (0 <= passes <= k).
-        k: number of runs (k >= 1).
+        passes: number of observed runs that passed (0 <= passes <= n).
+        n: number of observed runs (n >= 1).
         baseline_pass_rate: the pinned per-case baseline in [0, 1], optional.
             Recorded for tracking but does not affect the CI decision.
 
@@ -130,14 +140,33 @@ def case_passes(
 
     Raises:
         ValueError: if kind is not "regression" or "capability", or if
-            passes is outside [0, k].
+            passes is outside [0, n].
 
-    Worked numbers (Artifact G, k = 5):
+    Worked numbers (Artifact G, n = 5):
         case_passes("regression", 5, 5)          -> pass
         case_passes("regression", 4, 5)          -> block (any failed run)
         case_passes("capability", 3, 5, 0.6)     -> pass  (never blocks)
         case_passes("capability", 2, 5, 0.6)     -> pass  (never blocks)
         case_passes("capability", 1, 5, 0.6)     -> pass  (never blocks)
     """
-    ### YOUR CODE HERE (hw6)
-    raise NotImplementedError("hw6: implement case_passes")
+    if kind not in {"regression", "capability"}:
+        raise ValueError(f"kind must be 'regression' or 'capability', got {kind!r}")
+    if not (0 <= passes <= n):
+        raise ValueError(f"passes must be between 0 and n={n}, got {passes}")
+
+    if kind == "regression":
+        if passes == n:
+            return {"decision": "pass", "reason": f"regression case passed {n} of {n} runs"}
+        failures = n - passes
+        return {
+            "decision": "block",
+            "reason": f"regression case failed {failures} of {n} runs",
+        }
+
+    baseline_note = (
+        f", baseline {baseline_pass_rate}" if baseline_pass_rate is not None else ""
+    )
+    return {
+        "decision": "pass",
+        "reason": f"capability case passed {passes} of {n}{baseline_note}, not blocking",
+    }

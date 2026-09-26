@@ -1,0 +1,16 @@
+{
+  "case_id": "e-007",
+  "case_mode": "store_id_shown_instead_of_name",
+  "pull_request": "https://github.com/BertStaub/cartwheel-homeworks/pull/1",
+  "regression_run": {
+    "url": "https://github.com/BertStaub/cartwheel-homeworks/actions/runs/36245086698",
+    "change": "Added a temporary system-prompt instruction telling the agent to refer to stores only by numeric store_id, never by name.",
+    "result": "e-007 failed 0/5 (CI decision: block). Every other regression case (e-003, e-004, e-010) still passed 5/5, so the injected regression was isolated to the targeted case."
+  },
+  "revert_run": {
+    "url": "https://github.com/BertStaub/cartwheel-homeworks/actions/runs/36245957878",
+    "change": "Reverted the temporary instruction; agent/agent.py is byte-identical to before the regression was injected.",
+    "result": "e-007 recovered to 5/5 (CI decision: pass), confirming the original behavior returned."
+  },
+  "explanation": "e-007 is the case this experiment targeted: it failed completely (0/5) while the prompt told the agent to hide store names, and fully recovered (5/5) once that instruction was removed, with no code change other than the revert itself. In the same revert run, a different regression case (e-010, store_override_policy_not_cited) unexpectedly failed 4/5. That case was untouched by either the injection or the revert, so this isn't the same regression resurfacing -- it's ordinary sampling variance in a case that passed 5/5 in its original baseline. Per the handout's guidance, this failure is recorded as new evidence rather than dismissed or rerun: the revert run's overall CI decision is still 'block', but for a reason unrelated to the experiment (e-010), while the targeted case (e-007) is confirmed fixed."
+}

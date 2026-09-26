@@ -44,6 +44,13 @@ EVAL_CASES_PATH = REPO_ROOT / "eval_cases" / "cases.jsonl"
 # exactly these names in a turn's tool calls.
 WRITE_TOOLS = {"issue_refund", "cancel_order"}
 
+# The policy- and order-investigation tools. "No investigation before
+# clarifying" checks (premature_help_lookup) look for exactly these names --
+# RESP-6's "assuming a specific action" covers both an assumed policy topic
+# (search_help_center, get_policy) and an assumed order/eligibility check
+# (get_order, list_my_orders).
+INVESTIGATION_TOOLS = {"search_help_center", "get_policy", "get_order", "list_my_orders"}
+
 REQUIRED_CASE_KEYS = {"id", "mode", "kind", "input", "initial_state", "expected"}
 
 
@@ -245,6 +252,15 @@ def _one_check(
         where = f"turn {check['turn']}" if check.get("turn") is not None else "any turn"
         return (not writes, f"no write tool on {where} (saw {writes or 'none'})")
 
+    if kind == "no_investigation_tools":
+        calls = _all_tool_calls(transcript, check.get("turn"))
+        investigated = [c["name"] for c in calls if c["name"] in INVESTIGATION_TOOLS]
+        where = f"turn {check['turn']}" if check.get("turn") is not None else "any turn"
+        return (
+            not investigated,
+            f"no investigation tool on {where} (saw {investigated or 'none'})",
+        )
+
     if kind == "tool_called":
         calls = _all_tool_calls(transcript, check.get("turn"))
         ok = any(c["name"] == check["name"] for c in calls)
@@ -366,6 +382,24 @@ def retrieved_docs_text(transcript: dict[str, Any]) -> str:
         elif call["name"] == "get_policy":
             chunks.append(f"[{result.get('policy_id')}] {result.get('body', '')}")
     return "\n\n".join(chunks) if chunks else "(no policy documents were retrieved)"
+
+
+def judge_trace_text(transcript: dict[str, Any]) -> str:
+    """Format a runtime transcript like the normalized traces used in HW5."""
+    lines: list[str] = []
+    for turn in transcript.get("turns", []):
+        lines.append(f"user: {turn.get('user', '')}")
+        for call in turn.get("tool_calls", []):
+            arguments = json.dumps(
+                call.get("args"), ensure_ascii=False, sort_keys=True, default=str
+            )
+            result = json.dumps(
+                call.get("result"), ensure_ascii=False, sort_keys=True, default=str
+            )
+            lines.append(f"tool_call: {arguments}")
+            lines.append(f"tool_result: {result}")
+        lines.append(f"assistant: {turn.get('reply', '')}")
+    return "\n".join(lines)
 
 
 def judge_reply(judge: dict[str, Any], reply: str, docs: str) -> str:

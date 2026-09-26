@@ -15,6 +15,18 @@ def _write_cases(path: Path, cases: list[dict]) -> None:
     path.write_text("\n".join(json.dumps(case) for case in cases) + "\n")
 
 
+def _write_job(job: Path, trials: list[dict]) -> None:
+    """Write a fake Harbor 0.23.0 job: one result.json per trial subdirectory,
+    plus an (unused-for-content) top-level result.json for the existence
+    check in harbor_adapter.summary._load_trials."""
+    job.mkdir(exist_ok=True)
+    (job / "result.json").write_text(json.dumps({}))
+    for index, trial in enumerate(trials):
+        trial_dir = job / f"trial-{index:03d}"
+        trial_dir.mkdir()
+        (trial_dir / "result.json").write_text(json.dumps(trial))
+
+
 def test_provider_key_follows_the_selected_model() -> None:
     assert _provider_key("gpt-example") == "OPENAI_API_KEY"
     assert _provider_key("o4-mini") == "OPENAI_API_KEY"
@@ -154,10 +166,9 @@ def test_summary_blocks_regressions_but_reports_capabilities(
         }
 
     job = tmp_path / "job"
-    job.mkdir()
     trials = [trial("e-201", value) for value in [1, 1, 1, 1, 0]]
     trials += [trial("e-202", value) for value in [0, 0, 1, 0, 1]]
-    (job / "result.json").write_text(json.dumps({"trial_results": trials}))
+    _write_job(job, trials)
 
     markdown, passed = summarize_job(
         job, cases_path=cases_path, expected_attempts=5
@@ -189,10 +200,9 @@ def test_baseline_summary_reports_the_observed_classification(tmp_path: Path) ->
         }
 
     job = tmp_path / "job"
-    job.mkdir()
     trials = [trial("e-301", 1, i) for i in range(5)]
     trials += [trial("e-302", value, i) for i, value in enumerate([1, 1, 1, 0, 0])]
-    (job / "result.json").write_text(json.dumps({"trial_results": trials}))
+    _write_job(job, trials)
 
     markdown, passed = summarize_job(
         job,
@@ -219,7 +229,6 @@ def test_baseline_summary_does_not_classify_infrastructure_errors(
     }
     _write_cases(cases_path, [case])
     job = tmp_path / "job"
-    job.mkdir()
     trials = [
         {
             "task_name": "cartwheel/evals__e-303",
@@ -235,7 +244,7 @@ def test_baseline_summary_does_not_classify_infrastructure_errors(
             "exception_info": {"message": "sandbox failed"},
         }
     )
-    (job / "result.json").write_text(json.dumps({"trial_results": trials}))
+    _write_job(job, trials)
 
     markdown, passed = summarize_job(
         job,
@@ -290,13 +299,15 @@ def test_capability_analysis_uses_5_10_and_15_observed_runs(
         lambda n, c, k: (n + c + k) / 100,
     )
     job = tmp_path / "job"
-    job.mkdir()
     trials = []
     for attempt in range(14, -1, -1):
+        # Earlier attempts (14 down to 0) started earlier in real time, so
+        # attempt 14 gets the earliest started_at and should sort first.
         trials.append(
             {
                 "task_name": "cartwheel/evals__e-401",
                 "trial_name": f"trial-{attempt:02d}",
+                "started_at": f"2026-09-25T00:{14 - attempt:02d}:00Z",
                 "verifier_result": {
                     "rewards": {"reward": 1 if attempt % 2 == 0 else 0}
                 },
@@ -309,7 +320,7 @@ def test_capability_analysis_uses_5_10_and_15_observed_runs(
                 "exception_info": None,
             }
         )
-    (job / "result.json").write_text(json.dumps({"trial_results": trials}))
+    _write_job(job, trials)
 
     result = analyze_capability_job(job, "e-401")
 
@@ -317,7 +328,7 @@ def test_capability_analysis_uses_5_10_and_15_observed_runs(
     assert result["rewards"][:3] == [1, 0, 1]
     assert result["model"] == "student/provider-model"
     assert result["trials"][0]["trial_name"] == "trial-14"
-    assert result["trial_order"] == "result.json trial_results order"
+    assert result["trial_order"] == "each trial's result.json, sorted by started_at"
     assert [row["n"] for row in result["comparisons"]] == [5, 10, 15]
     assert set(result["comparisons"][-1]["pass_at_k"]) == {
         "1",

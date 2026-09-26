@@ -30,6 +30,25 @@ def _reward(trial: dict[str, Any]) -> float | None:
     return None
 
 
+def _load_trials(job_dir: Path) -> list[dict[str, Any]]:
+    """Load every trial's result from its own subdirectory.
+
+    Harbor 0.23.0 writes one `result.json` per trial under `job_dir`, and
+    omits the aggregated `trial_results` list from the top-level
+    `job_dir/result.json` (see `harbor.job.Job._write_job_result`, which is
+    always called with `exclude_trial_results=True`). Trials are sorted by
+    `started_at` so downstream ordering reflects execution order, not
+    filesystem globbing order.
+    """
+    if not (job_dir / "result.json").exists():
+        raise FileNotFoundError(f"Harbor result not found: {job_dir / 'result.json'}")
+    trials = [
+        json.loads(path.read_text()) for path in job_dir.glob("*/result.json")
+    ]
+    trials.sort(key=lambda trial: (trial.get("started_at") or "", trial.get("trial_name") or ""))
+    return trials
+
+
 def summarize_job(
     job_dir: Path,
     *,
@@ -43,13 +62,9 @@ def summarize_job(
     else:
         cases = load_cases(cases_path)
     by_id = {case["id"]: case for case in cases}
-    result_path = job_dir / "result.json"
-    if not result_path.exists():
-        raise FileNotFoundError(f"Harbor result not found: {result_path}")
-    result = json.loads(result_path.read_text())
     trials: dict[str, list[dict[str, Any]]] = defaultdict(list)
     unknown: list[str] = []
-    for trial in result.get("trial_results", []):
+    for trial in _load_trials(job_dir):
         case_id = _case_id(str(trial.get("task_name", "")), set(by_id))
         if case_id is None:
             unknown.append(str(trial.get("task_name", "")))

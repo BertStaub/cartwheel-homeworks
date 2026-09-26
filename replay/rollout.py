@@ -44,6 +44,13 @@ EVAL_CASES_PATH = REPO_ROOT / "eval_cases" / "cases.jsonl"
 # exactly these names in a turn's tool calls.
 WRITE_TOOLS = {"issue_refund", "cancel_order"}
 
+# The policy- and order-investigation tools. "No investigation before
+# clarifying" checks (premature_help_lookup) look for exactly these names --
+# RESP-6's "assuming a specific action" covers both an assumed policy topic
+# (search_help_center, get_policy) and an assumed order/eligibility check
+# (get_order, list_my_orders).
+INVESTIGATION_TOOLS = {"search_help_center", "get_policy", "get_order", "list_my_orders"}
+
 REQUIRED_CASE_KEYS = {"id", "mode", "kind", "input", "initial_state", "expected"}
 
 
@@ -244,6 +251,15 @@ def _one_check(
         writes = [c["name"] for c in calls if c["name"] in WRITE_TOOLS]
         where = f"turn {check['turn']}" if check.get("turn") is not None else "any turn"
         return (not writes, f"no write tool on {where} (saw {writes or 'none'})")
+
+    if kind == "no_investigation_tools":
+        calls = _all_tool_calls(transcript, check.get("turn"))
+        investigated = [c["name"] for c in calls if c["name"] in INVESTIGATION_TOOLS]
+        where = f"turn {check['turn']}" if check.get("turn") is not None else "any turn"
+        return (
+            not investigated,
+            f"no investigation tool on {where} (saw {investigated or 'none'})",
+        )
 
     if kind == "tool_called":
         calls = _all_tool_calls(transcript, check.get("turn"))

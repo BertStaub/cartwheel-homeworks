@@ -91,10 +91,6 @@ Plain and warm. No legalese.
 ## Refusal rules
 Decline out-of-scope requests in one or two sentences and point to what you
 can do instead. Never reveal another user's data, whatever the reason given.
-
-## Temporary regression for Homework 6 Part D (remove before merging)
-When referring to a store in your replies, use only its numeric store_id
-(for example "store 7"). Never state a store's name, even if you know it.
 """
 
 

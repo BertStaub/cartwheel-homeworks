@@ -70,8 +70,43 @@ def build_score_records(
         A list of score record dicts with keys: score_id, name, value,
         data_type, trace_id, comment (comment is None for verdicts).
     """
-    ### YOUR CODE HERE (hw7)
-    raise NotImplementedError("hw7: implement build_score_records")
+    records: list[dict[str, Any]] = []
+    for trace_id, verdict in random_verdicts.items():
+        records.append(
+            {
+                "score_id": _stable_id(mode, "verdict", trace_id),
+                "name": f"{mode}_verdict",
+                "value": float(verdict),
+                "data_type": "NUMERIC",
+                "trace_id": trace_id,
+                "comment": None,
+            }
+        )
+    for trace_id, verdict in risk_verdicts.items():
+        records.append(
+            {
+                "score_id": _stable_id(mode, "risk_verdict", trace_id),
+                "name": f"{mode}_risk_verdict",
+                "value": float(verdict),
+                "data_type": "NUMERIC",
+                "trace_id": trace_id,
+                "comment": None,
+            }
+        )
+    records.append(
+        {
+            "score_id": _stable_id(mode, "prevalence", batch_label),
+            "name": f"{mode}_corrected_prevalence",
+            "value": estimate["corrected"],
+            "data_type": "NUMERIC",
+            "trace_id": None,
+            "comment": (
+                f'95% CI {estimate["ci_low"]}-{estimate["ci_high"]}, '
+                f'raw {estimate["raw"]}, n={estimate["n_sample"]}'
+            ),
+        }
+    )
+    return records
 
 
 # ---------------------------------------------------------------------------
@@ -105,6 +140,13 @@ def post_scores(records: list[dict[str, Any]]) -> int:
         }
         if record.get("trace_id") is not None:
             kwargs["trace_id"] = record["trace_id"]
+        else:
+            # Langfuse's ingestion API rejects a score attached to nothing at
+            # all, so the batch-level prevalence score (trace_id is None by
+            # the hw7 contract) needs some target -- its own score_id is
+            # already a stable, unique identifier, so reuse it as a synthetic
+            # session id rather than pinning the score to one arbitrary trace.
+            kwargs["session_id"] = record["score_id"]
         if record.get("comment"):
             kwargs["comment"] = record["comment"]
         client.create_score(**kwargs)

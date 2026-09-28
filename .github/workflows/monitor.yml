@@ -1,0 +1,34 @@
+name: monitor
+
+on:
+  schedule:
+    - cron: "0 13 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  run-monitor:
+    name: judge the last 24 hours of traces
+    runs-on: self-hosted
+    env:
+      LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+      LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+      LANGFUSE_HOST: ${{ vars.LANGFUSE_HOST }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync
+
+      - name: Sample, judge, correct, and score the last 24 hours
+        run: uv run python -m monitoring.run --last-hours 24 --confirm
+
+      - name: Upload the local monitoring output as a workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitor-output
+          path: |
+            monitoring/history.jsonl
+            monitoring/prevalence.svg

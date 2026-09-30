@@ -1,26 +1,36 @@
 ---
 name: improve-loop
-description: Improve one Cartwheel failure mode by editing allowed agent files, scoring each edit on the Homework 8 development cases, and keeping only edits that raise the score, within the 150 run search budget.
+description: Run an autoresearch loop that hill climbs on a project's evaluation score. Edit only allowed files, one change at a time, rerun the evaluation, keep a change only when the score improves, and log every attempt until the budget is spent. Use when a project provides a program.md that names the editable files, the evaluation command, and the budget.
 ---
 
 # Improve loop
 
-Use the development cases only. Never run `uv run python -m optimize.runner --split test` or `uv run python -m optimize.frontier` during the improvement loop.
+An autoresearch loop for any project. The human writes `program.md`; you run the loop it describes.
 
-1. Read `optimize/allowlist.txt`, `optimize/state/split.json`, `optimize/state/search_budget.json`, and `optimize/results/target.json`. Stop and name the missing file when one is absent.
-2. Read `optimize/results/latest-development.json`, and choose one failing case whose failure modes include the target failure mode.
-3. Change files from one layer only. The allowed layers are the prompt in `agent/agent.py`, the tools in `agent/tools.py`, or the agent harness in the other allowlisted files. Do not edit files outside `optimize/allowlist.txt`.
-4. Do not edit `eval_cases/`, `tests/`, `analysis/state/judges/`, or `optimize/state/`. Do not weaken the permission checks in `agent/auth.py`.
-5. Commit the change, then run:
+## Setup
 
-   ```bash
-   uv run python -m optimize.runner --split development --candidate <short-name> --search
-   ```
+1. Find the project's `program.md` (e.g., `optimize/program.md`) and read it fully. It defines:
+   - the files you may edit,
+   - the files you must never edit (the evaluator, the tests, the held-out cases, and the budget state),
+   - the evaluation command and the metric it reports,
+   - the keep rule, the budget, and the log file.
+2. If any of the above is missing, stop and ask the human. Never guess an evaluation command or a metric.
+3. Run the evaluation once on the current code to record a baseline score, and log it as the current best.
 
-   One evaluated case run uses one unit of the 150 run budget, and the command refuses a run that would exceed the budget.
-6. Compare the new `score` and `write_pass_5` with the current best result. Keep the change only when the score improves and `write_pass_5` does not drop; otherwise revert the commit.
-7. Stop when the budget is exhausted, when two consecutive changes do not improve the score, or when one candidate passes every development case.
+## Loop
 
-After every candidate, append one JSON object to `optimize/results/improve-loop.jsonl`. Record `candidate`, `changed_layer`, `changed_files`, `rationale`, `development_score`, `write_pass_5`, `decision`, `git_commit`, and `result_file`.
+1. Read the latest evaluation result and pick one failure to fix.
+2. Make one small change in the allowed files only. Prefer deleting or simplifying code over adding more.
+3. Commit the change, then run the evaluation command.
+4. Keep the commit only if the keep rule in `program.md` is met. Otherwise revert the edited files to the last kept commit.
+5. Append one line to the log: the change, the files changed, a one-line rationale, the score, the decision, the commit, and the result file.
+6. Stop when the budget is spent, when two changes in a row do not improve the score, or when the score cannot improve further.
 
-Report the changed layer, the files changed, the development results compared, the remaining budget, and any failures that remain.
+## Rules
+
+- Never edit the evaluator, the tests, the held-out cases, or the budget, and never run the held-out cases.
+- Never change a setting to make the evaluation easier, e.g., a timeout, a seed, or a sample size.
+- Never weaken access controls or other safety checks to raise the score.
+- Treat a small score gain with suspicion. When the evaluation set is small, rerun a promising change before keeping it.
+
+Finish with a report: the changes kept, the score before and after, the budget used, and the failures that remain.

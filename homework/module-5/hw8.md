@@ -184,7 +184,7 @@ The adapter runs the Cartwheel agent with the development model and uses the GEP
 
 ### 3. Run the improve loop
 
-Ask your coding agent to use `.agents/skills/improve-loop/SKILL.md`. The skill runs the following budgeted command after each proposed change:
+Ask your coding agent to use `.agents/skills/improve-loop/SKILL.md`, a general autoresearch loop, with `optimize/program.md` as its Cartwheel setup. The skill runs the following budgeted command after each proposed change:
 
 ```bash
 uv run python -m optimize.runner --split development --candidate SHORT_NAME --search

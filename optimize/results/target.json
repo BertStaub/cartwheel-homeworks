@@ -1,0 +1,12 @@
+{
+  "failure_mode": "unsupported_policy_claim",
+  "source": "Reference unsupported_policy_claim judge (v3) prevalence; example traces from live Langfuse review",
+  "prevalence": 0.18,
+  "requirement": "RESP-3",
+  "example_trace_ids": [
+    "04eff4bd240372db5dffea9c78c71649",
+    "473c4e29f9d87243d521cb5dbbfac0de",
+    "74926489f88ceafede65292f53f9bb4a"
+  ],
+  "why_agent_can_change_it": "In all three traces the agent's reply asserts something no retrieved document or tool result backs. In support-0187 it suggests an expired return window 'should be reconsidered', in support-0241 it cites cw-returns and cw-refunds without ever retrieving them, and in support-0089 it implies a replacement is available. Each is the agent's own wording, not a tool output, so the system prompt can tell it to state only what retrieved documents or tool results support and to say so when a source was not retrieved."
+}

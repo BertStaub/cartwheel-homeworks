@@ -1,0 +1,232 @@
+{
+  "candidate": "gepa_best",
+  "case_count": 10,
+  "cases": [
+    {
+      "case_id": "e-004",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        15.4397
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I am going to check the details and refund eligibility of order #4.\nI will search the help center for the return and refund policy to understand why this order is not eligible for a return.\nI will search the help center specifically for the return policy.\nI will retrieve the full text of the Cartwheel return policy to check the requirements and any store override details.\nI will search the help center to see if Little Fox Toys has a specific store policy overriding the default return window.\nI will retrieve the policy on store overrides to confirm how return windows apply.\nI will look up the escalations policy to see the timeframe and procedure for human follow-up.\nI will escalate this case to a human support agent because the return request falls outside our return policy window.\nUnder Cartwheel's return policy (`cw-returns`), items can be returned within 30 days of delivery. Order #4 from Little Fox Toys was delivered on January 23, 2025, which places it outside of the 30-day return window, so it is not eligible for a return or refund.\n\nBecause your request falls outside the standard policy, I have opened a ticket (ticket #151) and escalated your case to a human support agent. According to our escalation policy (`cw-escalations`), a human support agent will follow up within 24 hours.",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-006",
+      "expected_write": false,
+      "failure_modes": [
+        "agent_error:MaxTurnsExceeded"
+      ],
+      "latencies_seconds": [
+        21.076
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": "Max turns (12) exceeded",
+          "failure_modes": [
+            "agent_error:MaxTurnsExceeded"
+          ],
+          "final_reply": "",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-007",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        3.2129
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll check the details for order #3 to see its status and which store it was placed with.\nOrder #3 is from the store **Pocket Arcade**. \n\nHere are the details for your order:\n- **Status:** Delivered (delivered on June 30, 2025)\n- **Total:** $291.00\n- **Store:** Pocket Arcade\n\nLet me know if there's anything else you need help with regarding this order!",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-008",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        11.3568
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I am going to look up the details for order #41 to check its delivery date and current status.\nI am going to search the help center for Cartwheel's return policy to find the standard return window and any store-specific rules.\nI am going to fetch the full text of the return policy document to check the details of Cartwheel's return window.\nI am going to search the help center for Meridian Cycles to check if the store has its own return policy.\nI am going to fetch the store policy for Meridian Cycles to verify their return window terms.\nUnder the Meridian Cycles store policy (`store-meridian-cycles-policy`), returns are accepted within **21 days of delivery**, which takes precedence over Cartwheel's standard 30-day return window (`cw-returns`).\n\nFor order #41:\n- **Delivered on:** February 13, 2026\n- **Return window:** 21 days from the date of delivery, which gave you until **March 6, 2026** to return the order.",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-009",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        9.3307
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I am going to look up the details for order #52 to check its date, items, and return eligibility.\nI am going to search the help center to find Cartwheel's return window policy.\nI am going to retrieve the full text of the Cartwheel return policy to review the standard return window and any store override rules.\nI am going to search the help center for Northwind Books' store policy to see if they have a custom return window.\nI am going to fetch the full text of Northwind Books' store policy to confirm their specific return terms.\nAccording to the Northwind Books store policy (`store-northwind-books-policy`), Northwind Books accepts returns within **45 days of delivery**, which overrides Cartwheel's standard 30-day return window (`cw-returns`).\n\nFor order #52:\n- **Delivered date:** April 9, 2025\n- **Return window:** 45 days from delivery, which makes the return deadline **May 24, 2025**.",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-011",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        14.0864
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I will check the details and refund eligibility for order #8.\nI will search the help center for Cartwheel's return and refund policies to understand the return window and remedies.\nI will search the help center for Cartwheel's return window policy and any store policy for Paper Lantern Press.\nI will retrieve the full Cartwheel return policy to check return window rules.\nI will retrieve the Cartwheel refund policy to check rules on refunds.\nI will search the help center to see if Paper Lantern Press has a specific store policy.\nI will retrieve the escalation policy to know how and when a human will follow up.\nI will escalate this request to a human support agent for review since order #8 is outside the standard return policy.\nUnder Cartwheel's return policy (`cw-returns`), items can be returned within 30 days of delivery. Because order #8 was delivered on April 4, 2026, it is past the 30-day window and is marked ineligible for a refund. \n\nCartwheel's standard policies do not offer alternative remedies such as partial refunds, store credit, or window exceptions. Because your request falls outside what I can provide under policy, I have opened a support ticket (ticket #151) and escalated your case to a human support agent for review. \n\nPer our escalation policy (`cw-escalations`), a human support agent will follow up within 24 hours, though I cannot promise a specific outcome.",
+          "judge_reasons": {
+            "unsupported_policy_claim": "{\"reasoning\":\"The agent claims the 30-day return window (supported by cw-returns), that the order is past that window, and that Cartwheel's standard policies do not offer alternative remedies such as partial refunds, store credit, or window exceptions. The provided documents indeed do not mention such alternatives, so saying they are not offered is consistent. The agent also claims a human support agent will follow up within 24 hours per cw-escalations, which is supported by that document. All policy claims are supported by or consistent with the provided documents.\",\"answer\":\"pass\"}"
+          },
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-012",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        17.7882
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I will look up the details and refund eligibility for order #7 to check its status.\nI will search the help center for policies regarding returns, refunds, and damaged items.\nI will retrieve the full text of Cartwheel's return policy to understand the return window and how damaged items are handled.\nI will search the help center for store overrides or damaged item policies to see if special exceptions apply to damaged deliveries.\nI will search the help center for Wooden Whale Workshop's specific store policy.\nI will retrieve the escalation policy to check the process and timeframe for human support follow-ups.\nI will search the help center to see if Cartwheel has any policy regarding replacements or damaged items.\nI will retrieve the full dispute policy to understand dispute options for delivered orders.\nI will escalate this case to a human support agent for review since the order is past the standard return window and arrived damaged.\nUnder Cartwheel's return policy (`cw-returns`), items can be returned within 30 days of delivery. Order #7 from Wooden Whale Workshop was delivered on March 28, 2025, and the order record indicates that it is past this window and not eligible for a standard return or refund. Cartwheel's automated policies do not provide direct replacements or exceptions to the return window. \n\nHowever, under Cartwheel's dispute policy (`cw-disputes`), buyers may dispute a charge for up to 60 days after delivery, and those situations are reviewed by a human agent. In addition, under `cw-escalations`, cases that cannot be resolved automatically go to a human support agent. \n\nI have opened an escalation ticket (#151) for our support team to review your situation. Per `cw-escalations`, a human support agent will follow up with you within 24 hours.",
+          "judge_reasons": {
+            "unsupported_policy_claim": "{\"reasoning\":\"The reply claims: (1) 30-day return window from delivery \u2013 supported by cw-returns. (2) Cartwheel's automated policies do not provide direct replacements or exceptions \u2013 no document contradicts this, and no document mentions replacements. (3) Buyers may dispute up to 60 days after delivery, reviewed by a human agent \u2013 supported by cw-disputes. (4) Cases that cannot be resolved automatically go to a human support agent, who will follow up within 24 hours \u2013 supported by cw-escalations. All policy claims are supported by the provided documents.\",\"answer\":\"pass\"}"
+          },
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-013",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        16.8264
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I am going to search our help center policies regarding returns and refund methods to see how refunds can be issued.\nI am going to check the full text of our refund policy to understand the rules regarding original payment methods and alternative refund options.\nI am going to check the return policy to see how returns and eligibility are handled.\nI am going to retrieve the full return policy to review standard return conditions.\nI am going to check if Fern & Fog Skincare has a specific store policy regarding returns.\nI am going to look up the details and refund eligibility of order #117.\nI am going to check the escalations policy to review the escalation process and follow-up timeframe.\nI am going to escalate your request to a human support agent since requesting a refund to an alternate payment method or as store credit falls outside standard platform policy.\nUnder Cartwheel's refund policy (`cw-refunds`), approved refunds must be returned to the original payment method used at purchase. Cartwheel does not offer store credit or the option to redirect refunds to an alternative method like PayPal. \n\nWhile order #117 is marked as eligible for a standard return under Cartwheel's return policy (`cw-returns`), your request to receive the refund via PayPal or store credit falls outside our standard policy. \n\nI have escalated your request to our human support team (Ticket #151) for review. According to our escalation policy (`cw-escalations`), a human agent will follow up with you within 24 hours.",
+          "judge_reasons": {
+            "unsupported_policy_claim": "{\"reasoning\":\"The reply claims that refunds must go to the original payment method (supported by cw-refunds), that Cartwheel does not offer store credit or alternative refund methods (supported by cw-refunds stating refunds go back to original payment method, with no mention of alternatives), and that a human agent will follow up within 24 hours (supported by cw-escalations). All policy claims are supported by the provided documents.\",\"answer\":\"pass\"}"
+          },
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-014",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        1.377
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "Hi! I'd be happy to help. What can I assist you with today?",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-015",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        2.1097
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'm sorry to hear that! Could you please share the order number (or the item you ordered) and let me know what went wrong?",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    }
+  ],
+  "cost_per_100_conversations_usd": 1.73808,
+  "cost_usd": 0.173808,
+  "created_at": "2026-10-01T22:23:50.224333+00:00",
+  "evaluated_case_runs": 10,
+  "git_commit": "a7dfee96d5b65a4297d12bb11fd7e1e5bb1c6d6b",
+  "input_tokens": 164619,
+  "median_latency_seconds": 12.7216,
+  "model": "gemini/gemini-3.8-flash",
+  "output_tokens": 13425,
+  "price_date": "2026-10-01",
+  "prompt_sha256_12": "5006f2ad8fe5",
+  "schema_version": 1,
+  "score": 0.9,
+  "split": "development",
+  "test_plan_sha256": null,
+  "write_pass_5": null
+}

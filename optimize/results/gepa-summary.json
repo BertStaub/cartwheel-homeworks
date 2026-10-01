@@ -1,0 +1,8 @@
+{
+  "best_prompt": "/Users/bstaub/code/courses/AI_Evals/cartwheel-homeworks/optimize/results/gepa-best-prompt.txt",
+  "best_score": 0.8,
+  "created_at": "2026-10-01T22:05:50.589721+00:00",
+  "reflection_model": "anthropic/claude-opus-4-6",
+  "task_model": "gemini/gemini-3.8-flash",
+  "total_evals": 60
+}

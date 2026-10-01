@@ -1,0 +1,18 @@
+{
+  "comparison_models": [
+    "gpt-5.5",
+    "claude-opus-4-6",
+    "gemini/gemini-3.8-flash"
+  ],
+  "created_at": "2026-10-01T17:59:24.375383+00:00",
+  "development_model": "gemini/gemini-3.8-flash",
+  "development_result": "/Users/bstaub/code/courses/AI_Evals/cartwheel-homeworks/optimize/results/latest-development.json",
+  "development_score": 0.6,
+  "git_commit": "497c6f9cdcac5623abfaad5aafe719952d51158e",
+  "grader_sha256": "59c0627b80416e3c5ae2afdc3bf594068dc05beca308978bd22897a5492f94e2",
+  "kind": "starting",
+  "model_selection_sha256": "56a966bd5a1c00a6e30d1c7a9c7ac304368cbd467cb408c6211ef67ffe0a12a7",
+  "prompt_sha256_12": "b4366aae125d",
+  "split_membership_sha256": "ac185af70d959fd8c60c0759ae5e56402fa6fe2c8f901203a8762a41801d77db",
+  "write_pass_5": null
+}

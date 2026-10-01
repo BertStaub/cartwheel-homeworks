@@ -1,0 +1,136 @@
+{
+  "candidate": "starting-version-model-3",
+  "case_count": 5,
+  "cases": [
+    {
+      "case_id": "e-001",
+      "expected_write": false,
+      "failure_modes": [
+        "no refund row for #129"
+      ],
+      "latencies_seconds": [
+        14.6199
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "no refund row for #129"
+          ],
+          "final_reply": "I will look up the details and refund eligibility for order #129 to assist you with your request.\nI will search the help center for our return and refund policy to verify the requirements for your request.\nI will fetch the full text of our refund policy to ensure we meet all the conditions for processing this refund.\nI will search the help center to see if there is a specific return policy that applies to this delivered item.\nI will check the help center for any specific store policy for Blue Heron Ceramics or general platform return guidelines.\nI will look up the general Cartwheel return policy to confirm return guidelines.\nI will issue a refund of $20.00 for order #129 as requested.\nI will verify the status of the refund to ensure it was properly approved.\nYour refund for order #129 from Blue Heron Ceramics has been approved!\n\nUnder Cartwheel's return policy (**cw-returns**), items can be returned within 30 days of delivery, making your order eligible. In accordance with our refund policy (**cw-refunds**), refunds of $100 or less are automatically approved and returned to your original payment method within 5 to 10 business days.\n\n**Refund details:**\n- **Order ID:** #129\n- **Amount:** $20.00\n- **Status:** Approved\n\nPlease let me know if you need help with anything else!",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-002",
+      "expected_write": false,
+      "failure_modes": [
+        "no refund row for #64"
+      ],
+      "latencies_seconds": [
+        26.5861
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "no refund row for #64"
+          ],
+          "final_reply": "I will look up the details for order #64 to check its status and refund eligibility.\nI will search the help center for our return and refund policy to verify the guidelines and limits.\nI will fetch the full text of the refund policy to confirm the specific requirements and approval process.\nI will search the help center for the returns policy to check if there are specific requirements for item returns.\nI will search the help center for the general return policy to find the exact platform return rules.\nI will search the help center to see if Pocket Arcade has a store-specific return policy.\nI will fetch the platform return policy using policy ID cw-returns.\nI will check the current refund status for order #64 to see if a refund has already been initiated.\nI will submit the refund request for order #64 for the total amount of $158.25.\nI will check the refund status of order #64 to verify its approval state.\nI will escalate this case to a human support agent since the refund amount exceeds the auto-approval threshold.\nYour order #64 from Pocket Arcade is eligible for a return under our platform return policy (**cw-returns**), as it was delivered on June 19, 2026 and is within the 30-day window.\n\nI have submitted your refund request for **$158.25**. Under Cartwheel's refund policy (**cw-refunds**), refunds over $100 cannot be approved automatically and must be reviewed by a human support agent. \n\nYour refund status is currently **queued for approval** (Refund #575). I have escalated your request to our team (Ticket #151), and a human support agent will follow up with you within 24 hours to review and finalize it. Once approved, the funds typically appear back on your original payment method within 5 to 10 business days (**cw-refunds**).",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-003",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        19.476
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'm going to look up the details and refund eligibility for order #2.\nI'm going to search Cartwheel's help center to find the return and refund policy relevant to your order.\nI'm going to look up the full text of the refund policy to check the specific refund eligibility rules.\nI'm going to search the help center for return window and eligibility policies.\nI'm going to search the help center for Trailhead Supply's store return policy.\nI'm going to look up the full Cartwheel return policy to check the return window and terms.\nI'm going to search the help center for the store overrides policy referenced in the return policy.\nI'm going to check the current refund status record for order #2.\nI'm going to look up the product catalog for Trailhead Supply to check if there are any specific conditions on the product.\nI'm going to search the product catalog for products from Trailhead Supply.\nI'm going to list your recent orders to check your order history.\nUnder Cartwheel's return policy (`cw-returns`), items can be returned within 30 days of delivery. \n\nYour order #2 from Trailhead Supply was delivered on December 24, 2025, which falls well outside the 30-day return window. As a result, the order is not eligible for a return or refund, and there is no refund on file for it.\n\nIf there were special circumstances or an unresolved issue with your order, please let me know and I would be happy to connect you with a human support agent to review it!",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-005",
+      "expected_write": false,
+      "failure_modes": [
+        "reply contains 'Meridian Cycles'",
+        "reply contains 'Trailhead Supply'"
+      ],
+      "latencies_seconds": [
+        4.8916
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "reply contains 'Trailhead Supply'",
+            "reply contains 'Meridian Cycles'"
+          ],
+          "final_reply": "I will search the product catalog across all stores for the \"Midnight Dry Bag\" to see what options are available and which stores sell them.\nYes, we have two listings for the **Midnight Dry Bag** across different stores on Cartwheel:\n\n1. **Midnight Dry Bag**\n   - **Store:** Store ID 9\n   - **Price:** $60.25\n   - **Product ID:** 359\n\n2. **Midnight Dry Bag**\n   - **Store:** Store ID 10\n   - **Price:** $245.00\n   - **Product ID:** 362\n\nPlease let me know if you would like more details or assistance with anything else!",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-010",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        13.8023
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I am going to look up the details of order #19 to check its items, purchase date, and delivery status.\nI will search the help center for Cartwheel's return policy to find the standard return window and any store-specific return rules.\nI will search the help center to see if Blue Heron Ceramics has a specific store return policy.\nI will fetch the full text of the Cartwheel return policy to understand the return window rules.\nI will search the help center for the store overrides policy mentioned in the return guidelines.\nI will check the policy on how store policies interact with platform policy.\nI will search the help center for any policy specifically under the name \"Blue Heron\".\nI will search the help center for rules on refund eligibility and final sale items.\nUnder Cartwheel's platform return policy (policy `cw-returns`), items can be returned within **30 days of delivery**. Since Blue Heron Ceramics does not have a custom store override policy (policy `cw-store-overrides`), the standard 30-day window applies.\n\nFor order #19:\n- **Delivery date:** February 2, 2025\n- **Return window:** 30 days from delivery, which ended on **March 4, 2025**",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    }
+  ],
+  "cost_per_100_conversations_usd": 2.95188,
+  "cost_usd": 0.147594,
+  "created_at": "2026-10-01T23:10:13.698516+00:00",
+  "evaluated_case_runs": 5,
+  "git_commit": "497c6f9cdcac5623abfaad5aafe719952d51158e",
+  "input_tokens": 141867,
+  "median_latency_seconds": 14.6199,
+  "model": "gemini/gemini-3.8-flash",
+  "output_tokens": 10985,
+  "price_date": "2026-10-01",
+  "prompt_sha256_12": "b4366aae125d",
+  "schema_version": 1,
+  "score": 0.4,
+  "split": "test",
+  "test_plan_sha256": "bfb6698d319319c9f7419277040ec8ba798846a9799cbb61cc28c91106e82a13",
+  "write_pass_5": null
+}

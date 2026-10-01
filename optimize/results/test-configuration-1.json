@@ -1,0 +1,148 @@
+{
+  "candidate": "starting-version-model-1",
+  "case_count": 5,
+  "cases": [
+    {
+      "case_id": "e-001",
+      "expected_write": false,
+      "failure_modes": [
+        "tool get_order called"
+      ],
+      "latencies_seconds": [
+        5.6104
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "tool get_order called"
+          ],
+          "final_reply": "I\u2019ll look up order #129 and the return/refund policy so I can check whether a \u201cchanged my mind\u201d refund is eligible.",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-002",
+      "expected_write": false,
+      "failure_modes": [
+        "tool get_order called"
+      ],
+      "latencies_seconds": [
+        6.7066
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "tool get_order called"
+          ],
+          "final_reply": "I\u2019ll look up the Cartwheel return/refund policy for \u201cchanged my mind\u201d refunds so I can apply the right rule to your order.",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-003",
+      "expected_write": false,
+      "failure_modes": [
+        "tool get_order called"
+      ],
+      "latencies_seconds": [
+        5.9536
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "tool get_order called"
+          ],
+          "final_reply": "I\u2019ll look up order #2 for its refund eligibility and search the return/refund policy so I can answer based on the actual order and Cartwheel rules.",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-005",
+      "expected_write": false,
+      "failure_modes": [
+        "reply contains 'Meridian Cycles'",
+        "reply contains 'Trailhead Supply'",
+        "tool search_products called"
+      ],
+      "latencies_seconds": [
+        3.4063
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "tool search_products called",
+            "reply contains 'Trailhead Supply'",
+            "reply contains 'Meridian Cycles'"
+          ],
+          "final_reply": "I\u2019ll search the Cartwheel product catalog for \u201cMidnight Dry Bag\u201d across all stores so I can show available matches and where they\u2019re sold.",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-010",
+      "expected_write": false,
+      "failure_modes": [
+        "reply contains '30 days'",
+        "tool get_order called"
+      ],
+      "latencies_seconds": [
+        4.0107
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "tool get_order called",
+            "reply contains '30 days'"
+          ],
+          "final_reply": "I\u2019ll look up order #19 and the relevant return-policy article so I can calculate the return window from the order details.",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    }
+  ],
+  "cost_per_100_conversations_usd": 1.3169,
+  "cost_usd": 0.065845,
+  "created_at": "2026-10-01T23:07:18.380155+00:00",
+  "evaluated_case_runs": 5,
+  "git_commit": "497c6f9cdcac5623abfaad5aafe719952d51158e",
+  "input_tokens": 4577,
+  "median_latency_seconds": 5.6104,
+  "model": "gpt-5.5",
+  "output_tokens": 1432,
+  "price_date": "2026-10-01",
+  "prompt_sha256_12": "b4366aae125d",
+  "schema_version": 1,
+  "score": 0.0,
+  "split": "test",
+  "test_plan_sha256": "bfb6698d319319c9f7419277040ec8ba798846a9799cbb61cc28c91106e82a13",
+  "write_pass_5": null
+}

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import weakref
 from typing import Any
 
 from agents import Agent, ModelSettings, RunContextWrapper, function_tool
@@ -369,13 +370,49 @@ def escalate_to_human_logic(
 # ---------------------------------------------------------------------------
 
 
+# Per-run harness state, keyed by the run's AuthContext. The SDK hands each tool
+# call a fresh copy of its context wrapper, so state kept on the wrapper would
+# not survive between calls; the AuthContext object is shared by the whole run.
+_RUN_STATE: dict[int, dict[str, Any]] = {}
+
+
+def _run_state(ctx: AuthContext) -> dict[str, Any]:
+    key = id(ctx)
+    if key not in _RUN_STATE:
+        _RUN_STATE[key] = {"retrieved": set(), "gate_fired": False}
+        weakref.finalize(ctx, _RUN_STATE.pop, key, None)
+    return _RUN_STATE[key]
+
+
 def _call(
     wrapper: RunContextWrapper[AuthContext], fn: Any, /, *args: Any
 ) -> dict[str, Any]:
+    state = _run_state(wrapper.context)
+    # One-time precondition: the first escalation in a run must follow a
+    # get_policy("cw-escalations"), so the follow-up timeframe can be cited.
+    # It fires at most once, so it can never block an escalation.
+    if (
+        fn is escalate_to_human_logic
+        and "cw-escalations" not in state["retrieved"]
+        and not state["gate_fired"]
+    ):
+        state["gate_fired"] = True
+        result = {
+            "ok": False,
+            "error": "precondition_failed",
+            "reason": (
+                "Retrieve cw-escalations with get_policy first so you can cite "
+                "the follow-up timeframe, then call escalate_to_human again."
+            ),
+        }
+        record_tool_result(wrapper.context, result)
+        return result
     try:
         result = fn(wrapper.context, *args)
     except NotImplementedError as exc:
         result = {"ok": False, "error": "not_implemented", "reason": str(exc)}
+    if getattr(fn, "__name__", "") == "get_policy" and result.get("ok"):
+        state["retrieved"].add(result["policy_id"])
     record_tool_result(wrapper.context, result)
     return result
 

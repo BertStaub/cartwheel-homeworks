@@ -226,7 +226,14 @@ def search_help_center_logic(ctx: AuthContext, query: str, k: int = 3) -> dict[s
                 "score": round(float(score), 3),
             }
         )
-    return {"ok": True, "results": results}
+    return {
+        "ok": True,
+        "results": results,
+        "note": (
+            "These are excerpts. If no excerpt covers the user's question, say "
+            "no policy document covers it; do not say it is not offered."
+        ),
+    }
 
 
 def get_order_logic(ctx: AuthContext, order_id: int) -> dict[str, Any]:

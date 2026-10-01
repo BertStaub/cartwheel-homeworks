@@ -121,22 +121,41 @@ LITELLM_COURSE_MODELS = {
 }
 
 
+def _gateway() -> tuple[str, str] | None:
+    """Mercury LLM Gateway URL and token from .env, or None to call providers directly."""
+    import os
+
+    url, token = os.environ.get("LLM_GATEWAY_URL"), os.environ.get("LLM_GATEWAY_TOKEN")
+    return (url.rstrip("/"), token) if url and token else None
+
+
 def resolve_model(name: str | None) -> Any:
     """Turn a course model name into what Agent(model=...) expects.
 
     OpenAI models pass through as plain strings. Everything else goes through
     LiteLLM (claude-opus-4-6 via the Anthropic API with ANTHROPIC_API_KEY,
     glm-5.2 via Together AI with TOGETHER_API_KEY). Same agent code, three
-    providers; only this function changes.
+    providers; only this function changes. When LLM_GATEWAY_URL and
+    LLM_GATEWAY_TOKEN are set, gpt-* and claude-* go through the Mercury LLM
+    Gateway instead.
     """
     import os
 
     name = name or os.environ.get("CARTWHEEL_MODEL") or DEFAULT_MODEL
+    from agents.extensions.models.litellm_model import LitellmModel
+
+    gateway = _gateway()
+    if gateway and name.startswith("gpt-"):
+        url, token = gateway
+        return LitellmModel(model=f"openai/{name}", base_url=f"{url}/openai/v1", api_key=token)
+    if gateway and name.startswith("claude"):
+        url, _ = gateway
+        return LitellmModel(
+            model=f"anthropic/{name}", base_url=f"{url}/anthropic", api_key="gateway"
+        )
     if name.startswith("gpt-"):
         return name
     litellm_id = LITELLM_COURSE_MODELS.get(name, name)
-    from agents.extensions.models.litellm_model import LitellmModel
-
     return LitellmModel(model=litellm_id)
 
 
@@ -149,22 +168,25 @@ def model_settings_for(model: Any) -> ModelSettings:
     documents is passing `allowed_openai_params=["tools"]` per request; the
     Agents SDK forwards it through ModelSettings.extra_args.
     """
-    if isinstance(model, str) and model.startswith(("gpt-5", "o1", "o3", "o4")):
+    model_id = model if isinstance(model, str) else getattr(model, "model", "")
+    bare = model_id.removeprefix("openai/")  # gateway-routed gpt models are LiteLLM ids
+    if bare.startswith(("gpt-5", "o1", "o3", "o4")):
         return ModelSettings(
             reasoning={"effort": "high", "summary": "detailed"},
             verbosity="high",
             include_usage=True,
         )
-    if isinstance(model, str) and model.startswith("gpt-"):
+    if bare.startswith("gpt-"):
         # Older OpenAI chat models reject the reasoning and verbosity settings.
         return ModelSettings(include_usage=True)
-    model_id = getattr(model, "model", "") if not isinstance(model, str) else ""
     if model_id.startswith("together_ai/"):
         return ModelSettings(extra_args={"allowed_openai_params": ["tools"]})
     if "claude" in model_id or "anthropic" in model_id:
+        gateway = _gateway()
         return ModelSettings(
             reasoning={"effort": "high", "summary": "detailed"},
             include_usage=True,
+            extra_headers={"Authorization": f"Bearer {gateway[1]}"} if gateway else None,
         )
     return ModelSettings()
 

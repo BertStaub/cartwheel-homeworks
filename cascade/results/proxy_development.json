@@ -1,0 +1,233 @@
+{
+ "4e705640f898efc310dd26c7b0cc881f": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant merely summarized the order details retrieved directly from the order lookup tool, including the order's specific 'refund_eligible: true' status. No general policy claims regarding return windows, fees, or policy rules were made.",
+  "input_tokens": 873,
+  "output_tokens": 640
+ },
+ "c26ad3ec295d20e4232faf8f0d94c2b7": {
+  "verdict": 0,
+  "confidence": 0.95,
+  "critique": "The assistant's reply confirms the successful cancellation of the order and notes that any pending charge will be reversed to the original payment method as a result of the cancellation. The reply makes no policy claims regarding return windows, fees, eligibility rules, or alternative remedies.",
+  "input_tokens": 768,
+  "output_tokens": 1716
+ },
+ "582a40ba33ea8531418a1213d6f84397": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent claims that items can be returned within 30 days of delivery under Cartwheel's return policy (supported by cw-returns) and that charges can be disputed for up to 60 days after delivery with review by a human support agent (supported by cw-disputes). No store policy overrides were retrieved, and all cited policy terms accurately reflect the provided documents.",
+  "input_tokens": 1851,
+  "output_tokens": 1151
+ },
+ "7863254ced882b022e3ab0bc363df90c": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant provides order tracking details retrieved from the order lookup tool and suggests checking common delivery locations, but makes no policy claims regarding returns, refunds, fees, or eligibility.",
+  "input_tokens": 953,
+  "output_tokens": 713
+ },
+ "fc9b253d3490299bd75ff8d64b6d1654": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "All policy claims made by the agent regarding the refund process\u2014specifically that amounts over $100 require review by a human agent and that approved refunds are returned to the original payment method within 5\u201310 business days\u2014are fully supported by doc cw-refunds.",
+  "input_tokens": 1540,
+  "output_tokens": 370
+ },
+ "0fb1ec6a39472265973f9a159e5b76ef": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "Every policy claim in the agent's reply is supported by the provided documents. The 30-day return window from delivery and item condition requirements are supported by cw-returns, store overrides are supported by cw-returns, and cancellation rules prior to shipping versus after shipping are supported by cw-cancellations.",
+  "input_tokens": 1255,
+  "output_tokens": 872
+ },
+ "84deca1d4baed5a19dbb69aabca0292b": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "Every policy claim in the assistant's reply\u2014including the 30-day return window measured from delivery date, the item condition requirement, and potential store overrides such as restocking fees\u2014is accurately supported by the retrieved documents (cw-returns and store-cascade-audio-policy).",
+  "input_tokens": 1134,
+  "output_tokens": 814
+ },
+ "14d33160dc9216d9b0a6720f742efedd": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent cites the 30-day return window from cw-returns and the 60-day dispute window from cw-disputes, accurately applying both to the order's delivery date. No alternative remedies or unsupported terms were invented, and no store policy override was present in the retrieved documents.",
+  "input_tokens": 1890,
+  "output_tokens": 948
+ },
+ "33d2e1d01b736a7f82abab30a50d94e8": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant declines to answer the user's question regarding reselling and tax obligations, stating that Cartwheel does not have a specific policy on reselling taxes and that it cannot provide tax or legal advice. It makes no affirmative claims regarding Cartwheel's return windows, fees, refund methods, or eligibility.",
+  "input_tokens": 1065,
+  "output_tokens": 430
+ },
+ "fd44f339b740e5a64f3c60cfa9954bc2": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent accurately cites the 14-day return window from delivery for Juniper Home Goods based on policy document store-juniper-home-goods-policy, which overrides the standard 30-day window mentioned in cw-returns. No unsupported policy claims or unverified alternative remedies were introduced.",
+  "input_tokens": 1381,
+  "output_tokens": 645
+ },
+ "c4b43e9538251db43a392c1977538a37": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "All policy claims made by the agent\u2014including the 30-day return window calculated from the delivery date, item condition requirements, and store overrides or restocking fees\u2014are fully supported by doc cw-returns and store-cascade-audio-policy.",
+  "input_tokens": 1103,
+  "output_tokens": 684
+ },
+ "a3389ec071cb681e518a7c1637a572f9": {
+  "verdict": 1,
+  "confidence": 1.0,
+  "critique": "The agent claims that the human support agent will have the authority to arrange a replacement if warranted. None of the provided policy documents (cw-refunds, cw-returns, cw-disputes, store-northwind-books-policy) mention replacements as an available remedy, making this an invented alternative remedy.",
+  "input_tokens": 2273,
+  "output_tokens": 1657
+ },
+ "02b928ad4f66a53600ee939f7162343c": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent references the 30-day return window counting from delivery and notes that individual stores may override this window. Both of these policy claims are directly supported by document cw-returns. The order's eligibility status is sourced accurately from the order tool result, and no unsupported remedies or policies were claimed.",
+  "input_tokens": 1442,
+  "output_tokens": 710
+ },
+ "04eff4bd240372db5dffea9c78c71649": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent makes no unsupported policy claims. The mention of the expired return window aligns with the 30-day window from delivery outlined in 'cw-returns' (order delivered April 2026, months prior). The agent does not promise an exception or invent an unapproved remedy, merely escalating the case to human support with a 24-hour SLA as confirmed by the tool output.",
+  "input_tokens": 2097,
+  "output_tokens": 588
+ },
+ "83b976162317219675a72172cf2adc5b": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent claims that refunds over $100 are queued for review by a human support agent and that approved refunds return to the original payment method within 5\u201310 business days. Both of these statements are directly supported by policy document cw-refunds.",
+  "input_tokens": 2240,
+  "output_tokens": 1143
+ },
+ "2cc6463b3e5f86c5a938cf7395b25be2": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent cites the 30-day return window from delivery and notes that stores can override default windows, both of which are directly supported by cw-returns. The order's delivery date (Feb 12, 2026) and refund eligibility status match the retrieved order details. No unsupported policy claims or invented remedies were made.",
+  "input_tokens": 1375,
+  "output_tokens": 873
+ },
+ "3ee69b0e202c702a450b0e74670745df": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant's reply only summarizes the order details provided by the order lookup tool, including the fact that the order is marked as 'refund_eligible: true'. The agent makes no independent policy claims regarding return windows, fees, refund methods, or store-specific policies.",
+  "input_tokens": 874,
+  "output_tokens": 804
+ },
+ "5339605da6145faccc6b524ab373163e": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant's response informs the customer that their order has been cancelled and they will not be charged. It does not make any policy claims regarding return windows, fees, refund methods, eligibility, or alternative remedies.",
+  "input_tokens": 766,
+  "output_tokens": 626
+ },
+ "3ef09a392b6c3c5c8a3ab37d423f7f1e": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent makes two policy claims: that Cartwheel allows returns within 30 days of delivery (cw-returns) and that buyers can dispute a charge for up to 60 days after delivery with reviews handled by a human agent (cw-disputes). Both claims are directly supported by the retrieved policy documents, and no store policy overrides were provided or contradicted.",
+  "input_tokens": 1805,
+  "output_tokens": 889
+ },
+ "72d59df136c45b37fd1d5a15afd8ec5f": {
+  "verdict": 0,
+  "confidence": 0.95,
+  "critique": "The assistant informs the customer that the order was marked as delivered based on the order lookup tool result. It mentions that if the customer cannot find it, they can explore next steps such as looking into a refund or escalating, but makes no definitive or unsupported claims regarding store policies, return windows, fees, or eligibility.",
+  "input_tokens": 955,
+  "output_tokens": 720
+ },
+ "36e32376a4541227179e5fef86caf4bc": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant states that refunds over $100 are queued for human review and that approved refunds go back to the original payment method within 5\u201310 business days. Both policy claims are directly supported by doc cw-refunds.",
+  "input_tokens": 1416,
+  "output_tokens": 367
+ },
+ "a2e98436acbc2d7baffbacc38c5cca23": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant accurately explains the platform return policy using `cw-returns`, noting the 30-day window from delivery, required item condition, and that individual stores can override these terms or have specific policies (such as restocking fees, as seen in `store-cascade-audio-policy`). Every policy claim is supported by the retrieved documents.",
+  "input_tokens": 1216,
+  "output_tokens": 578
+ },
+ "ae951a08e4d4aac3d0e7499e2ef3092b": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent summarizes the general return policy from 'cw-returns', accurately citing the 30-day window from delivery, the condition requirements, and the possibility of store-specific overrides or restocking fees (also seen in 'store-cascade-audio-policy'). All stated policy facts are directly supported by the retrieved documentation.",
+  "input_tokens": 1117,
+  "output_tokens": 716
+ },
+ "e00f0065ca5554e61e18fd7a74964f14": {
+  "verdict": 1,
+  "confidence": 0.95,
+  "critique": "The agent claims that an escalated review by a human support agent can work toward a resolution 'whether that's a refund or a replacement.' None of the provided policy documents (cw-returns, cw-refunds, cw-disputes) mention replacements as an available remedy, making this an unsupported alternative remedy claim.",
+  "input_tokens": 1928,
+  "output_tokens": 1474
+ },
+ "32eb745ec094b07a63bbf1cdfc8bdac0": {
+  "verdict": 1,
+  "confidence": 0.9,
+  "critique": "The assistant states that 'Cartwheel collects applicable sales tax at checkout based on your shipping address.' However, none of the retrieved documents (which only cover returns and restocking fees) mention tax collection policies or how sales tax is calculated. Under the guideline that only provided documents count as support, this is an unsupported policy claim about platform behavior and fees.",
+  "input_tokens": 1085,
+  "output_tokens": 1261
+ },
+ "31b829413291906d92debe0e037d5888": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant accurately explains Juniper Home Goods' specific 14-day return window from delivery and references the platform default of 30 days being overridden, both of which are fully supported by 'store-juniper-home-goods-policy' and 'cw-returns'. No unsupported policy claims or alternative remedies were made.",
+  "input_tokens": 1372,
+  "output_tokens": 297
+ },
+ "03102afcd1fcaba0b95ce7304418e8f1": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant outlines the 30-day return window counting from delivery, the condition requirements, and mentions potential store overrides. All of these points directly match the information provided in cw-returns.",
+  "input_tokens": 1111,
+  "output_tokens": 321
+ },
+ "18351035b5c2eeaf9bba81ebd9e58f13": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "All policy claims made by the agent are directly supported by the retrieved documents: the 30-day return window from delivery is documented in 'cw-returns', the 60-day dispute window is supported by 'cw-disputes', and the human review requirement for refunds exceeding $100 is supported by 'cw-refunds'. No unsupported policies or alternative remedies were invented.",
+  "input_tokens": 1948,
+  "output_tokens": 1077
+ },
+ "c51b47b5fc6e2240230e87e9f828ce04": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant's only policy claim is that items can be returned within 30 days of delivery (counted from delivery date, not purchase date), which is directly supported by doc cw-returns. No store policy overriding the default was retrieved or provided, and no unsupported remedies or claims were made.",
+  "input_tokens": 1434,
+  "output_tokens": 778
+ },
+ "3ab232dbe028d84c65a259670fcadfd2": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent's reply informs the user that a ticket has been opened and quotes an SLA of 24 hours (provided directly by the ticket creation tool). It makes no policy claims regarding return windows, fees, refund methods, or eligibility.",
+  "input_tokens": 1533,
+  "output_tokens": 335
+ },
+ "836f85d962549fdc87834bb471e5a6e8": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent references the 30-day return window from delivery under Cartwheel's return policy, which is directly supported by document cw-returns. No conflicting store override policy was provided, and the agent does not invent any unsupported remedies.",
+  "input_tokens": 1721,
+  "output_tokens": 613
+ },
+ "fcb27b6a390a4be6f6e8c55c83483fbf": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent makes two policy claims in the final reply: that refunds over $100 require human agent review, and that approved refunds are returned to the original payment method within 5\u201310 business days. Both claims are directly supported by cw-refunds.",
+  "input_tokens": 1946,
+  "output_tokens": 1160
+ },
+ "ba8825d3fbddb412e68f1dee6252748c": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant cites the 30-day return window from delivery based on cw-returns, which is explicitly supported by the provided document. No store override document for Northwind Books was retrieved in the trace, and the assistant does not promise any unsupported remedies.",
+  "input_tokens": 1302,
+  "output_tokens": 1111
+ }
+}

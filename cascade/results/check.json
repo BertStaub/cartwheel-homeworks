@@ -1,0 +1,20 @@
+{
+  "split": "test",
+  "proxy_model": "gemini/gemini-3.8-flash",
+  "oracle": "unsupported_policy_claim-v3",
+  "threshold": 1.0,
+  "minimum_agreement_with_oracle": 0.9,
+  "examples": 33,
+  "oracle_failures_in_split": 4,
+  "agreement_with_oracle": 1.0,
+  "disagreements": 0,
+  "proxy_share": 0.8788,
+  "cost_per_1000_verdicts_usd": 4.54,
+  "cost_note": "proxy cost measured from token counts; oracle cost per verdict ($0.0060) is an estimate from costs.csv",
+  "agreement_with_human_labels": "not measured (no human labels)",
+  "decision": "rejected",
+  "reason": "Test agreement met the minimum, but the test split has only 4 oracle failures, too few to give a usable signal. Rejected on sample size, not on a failed threshold. Not ready for CI or monitoring.",
+  "rejected_before_test": [
+    "gemini/gemini-3.1-flash-lite: no threshold reached 0.9 agreement on development"
+  ]
+}

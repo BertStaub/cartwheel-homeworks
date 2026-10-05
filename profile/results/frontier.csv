@@ -1,0 +1,7 @@
+candidate,model,development_score,write_pass_5,cost_per_100_conversations_usd,median_latency_seconds,frontier_status
+hw8-final,gemini/gemini-3.8-flash,0.9,,2.219483,14.5941,frontier
+fewer-tokens,gemini/gemini-3.8-flash,0.7,,1.596998,10.8636,frontier
+cache-before,gpt-5.5,0.9,,5.07379,15.4894,dominated
+cache-after,gpt-5.5,0.9,,5.4211,22.6437,dominated
+cache-after-rerun1,gpt-5.5,0.9,,5.65418,21.0687,dominated
+cache-after-rerun2,gpt-5.5,0.9,,5.30228,14.2874,dominated

@@ -1,0 +1,12 @@
+{
+ "locked_at": "2026-10-05T17:34:15.053227+00:00",
+ "oracle": "unsupported_policy_claim-v3",
+ "proxy_model": "gemini/gemini-3.8-flash",
+ "threshold": 1.0,
+ "minimum_agreement_with_oracle": 0.9,
+ "agreement_with_human_labels": "not measured (no human labels)",
+ "note": "Locked before the test run. Not to be changed after seeing test results.",
+ "rejected_before_test": [
+  "gemini/gemini-3.1-flash-lite: no threshold reached 0.9 agreement on development"
+ ]
+}

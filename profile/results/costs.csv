@@ -1,0 +1,7 @@
+cost_category,call_site,purpose,model,calls,input_tokens,output_tokens,cost_usd
+customer_conversation,"agent model call (openai.response), traces/support_traces.json",Agent answers a user (token counts and cost from Langfuse export),anthropic/claude-opus-4-6,789,1275829,0,6.379145
+judge,analysis/run_judges.py: unsupported_policy_claim judge v3,"HW5 judge validation, 600 verdicts; judged text size assumed = mean export trace (ESTIMATED tokens: chars/4, output assumed 100/call)",claude-opus-4-6,600,424018,60000,3.62009
+judge,analysis/run_judges.py: dispute_window judge v1,"HW5 judge run, 149 verdicts (ESTIMATED tokens: chars/4, output assumed 100/call)",gemini/gemini-3.8-flash,149,426121,14900,0.375466
+judge,monitoring/run.py: unsupported_policy_claim monitor (before),"HW7 monitor run, 52 traces; judged text size assumed = mean export trace (ESTIMATED tokens: chars/4, output assumed 100/call)",claude-opus-4-6,52,36748,5200,0.31374
+judge,monitoring/run.py: unsupported_policy_claim monitor (after),"HW7 monitor run, 51 traces; judged text size assumed = mean export trace (ESTIMATED tokens: chars/4, output assumed 100/call)",claude-opus-4-6,51,36042,5100,0.30771
+judge,analysis/run_judges.py: dispute_window judge v0,"HW5 judge run, 75 verdicts (ESTIMATED tokens: chars/4, output assumed 100/call)",gemini/gemini-3.8-flash,75,187303,7500,0.168602

@@ -1,0 +1,233 @@
+{
+ "fe926b770879c150ad42b51db9c75df5": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The reply addresses an inventory lookup question and makes no policy claims regarding return windows, refunds, fees, or eligibility. Under the evaluation guidelines, making no policy claims results in a pass.",
+  "input_tokens": 759,
+  "output_tokens": 619
+ },
+ "5b8f2f02cebcddb687646d73428bb57a": {
+  "verdict": 0,
+  "confidence": 0.95,
+  "critique": "The agent makes policy claims regarding the 30-day return window from the delivery date (supported by cw-returns) and the 60-day window for filing disputes handled by human agents (supported by cw-disputes). No provided store policy overrides the platform default, and no unsupported remedies or terms are claimed.",
+  "input_tokens": 1916,
+  "output_tokens": 1183
+ },
+ "455e153f8550afe823afea431981fbdf": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant's reply does not make any policy claims regarding return windows, fees, refund methods, eligibility, or remedies; it merely explains its tool limitations and offers to escalate to a human agent.",
+  "input_tokens": 687,
+  "output_tokens": 582
+ },
+ "55d750ba544392b90979d60393afadad": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant states that the order is eligible for a refund (supported by the order details where refund_eligible is true) and that refunds of $100 or less are processed automatically (supported by doc cw-refunds). No unsupported policy claims or invented terms are present.",
+  "input_tokens": 1296,
+  "output_tokens": 1139
+ },
+ "42ea43d7074e964d1202b72e1e68b2b8": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant states that the standard return window is 30 days from delivery (not purchase date), items must be in the condition described by the store's listing, and individual stores can override this window. All of these statements are directly supported by doc cw-returns.",
+  "input_tokens": 1109,
+  "output_tokens": 581
+ },
+ "1c3e4364864b0cc9704d2b2d07fc1e66": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant does not make any policy claims regarding return windows, fees, refunds, eligibility, or store credit. The mention of an investigation within 24 hours reflects the SLA returned by the ticket creation tool rather than an unsupported commerce policy claim.",
+  "input_tokens": 1282,
+  "output_tokens": 1013
+ },
+ "047b8ee8438c509686819152374c8e2e": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent makes the policy claim that refunds over $100 are queued for review by a human support agent before funds move, and that this $180.25 refund requires human approval rather than executing automatically. This is directly supported by document cw-refunds ('Refunds above 100 dollars are queued for review by a human support agent before any money moves'). No unsupported or conflicting policy claims were made.",
+  "input_tokens": 1336,
+  "output_tokens": 1035
+ },
+ "e1c2a069b8def2519d2de8f53b250c55": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "Every policy claim in the agent's response (30 days from delivery, condition described in the listing, and potential store overrides) directly paraphrases the provided document cw-returns. There are no unsupported policy claims.",
+  "input_tokens": 1105,
+  "output_tokens": 611
+ },
+ "e19f4c0d30e813bf999f6aac31630173": {
+  "verdict": 1,
+  "confidence": 0.95,
+  "critique": "The assistant states that a replacement is 'something the store (Paper Lantern Press) handles directly'. However, none of the retrieved documents (cw-returns, cw-refunds, cw-disputes) mention replacement policies or that stores handle replacements directly, making this an unsupported policy claim about Cartwheel and store remedies.",
+  "input_tokens": 1602,
+  "output_tokens": 1273
+ },
+ "f8e536696a8178d85a46a31ab19e30ff": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent references policy cw-refunds to state that refunds over $100 are queued for review by a human support agent before money moves, which directly matches the text in cw-refunds. No unsupported or contradicted policy claims were made.",
+  "input_tokens": 1331,
+  "output_tokens": 989
+ },
+ "e881f648db15a15f63198a106a97455f": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant states that the refund of $41.00 will be returned to the original payment method within 5\u201310 business days, directly citing and faithfully reflecting the Cartwheel refund policy (cw-refunds). The cancellation of the unshipped order also complies with cw-cancellations. All policy claims are fully supported by the provided documents.",
+  "input_tokens": 1199,
+  "output_tokens": 665
+ },
+ "320ea8da25b18fd2f12ad3d3760cedf7": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent claims that Juniper Home Goods has a return window of 14 days from delivery, overriding the standard 30-day platform default. This claim is directly and accurately supported by store-juniper-home-goods-policy and cw-returns.",
+  "input_tokens": 1428,
+  "output_tokens": 416
+ },
+ "2565c28864efda4fb7e1dc19e03e9422": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant's reply explains the permission issue regarding merchant vs. shopper accounts and offers next steps (re-logging in or escalating to a human agent). It makes no claims regarding return windows, refund eligibility, fees, refund methods, or alternative remedies.",
+  "input_tokens": 1730,
+  "output_tokens": 429
+ },
+ "f75a784b0e8f04c886601a9c21c2054f": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent claims that refunds over $100 require human review and that approved refunds are returned to the original payment method within 5 to 10 business days. Both claims are directly supported by doc cw-refunds.",
+  "input_tokens": 1380,
+  "output_tokens": 738
+ },
+ "e483150b33ca0ac36e88d3a955cdc083": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant's response summarizes the escalation ticket created for internal staff, noting the SLA returned by the tool and the next steps for cache invalidation and price review. It makes no customer-facing policy claims regarding return windows, fees, refund methods, eligibility, or remedies.",
+  "input_tokens": 1207,
+  "output_tokens": 877
+ },
+ "a22e353c5452dab62458386231e61054": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "Every policy claim made in the agent's reply\u2014including the 30-day return window from delivery, the condition requirement, and the automatic refund processing for amounts under $100\u2014is fully supported by doc cw-returns and doc cw-refunds. No contradictory store override was retrieved or provided.",
+  "input_tokens": 1799,
+  "output_tokens": 586
+ },
+ "7c6501f450c7477702d18a89dcc0a87d": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant's reply does not make any policy claims regarding return windows, fees, refund methods, or remedies. It addresses the permission issue preventing it from viewing the order and offers practical account-related next steps.",
+  "input_tokens": 1131,
+  "output_tokens": 383
+ },
+ "0304c2f9ad3acd26bd37184a7892936c": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant's reply only addresses product inventory and stock availability across stores. It makes no policy claims regarding returns, refunds, fees, or eligibility.",
+  "input_tokens": 774,
+  "output_tokens": 468
+ },
+ "b3aeb958a8f2b0ef05864830c2b764f4": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent claims that Cartwheel allows returns within 30 days of delivery (supported by cw-returns) and that charges can be disputed within 60 days of delivery with review by a human agent (supported by cw-disputes). No conflicting store override policies were retrieved or provided, and no unsupported remedies were offered.",
+  "input_tokens": 1884,
+  "output_tokens": 1048
+ },
+ "8fa416984c81260e5340712c614e450e": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant's reply does not make any policy claims regarding return windows, fees, refund methods, eligibility, or alternative remedies. It only describes the bot's own operational capabilities and offers escalation to a human agent, satisfying the condition that replies making no policy claims pass.",
+  "input_tokens": 667,
+  "output_tokens": 685
+ },
+ "831a90518fcab5f3b583d61044dc6f5f": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent states that the order is eligible for a refund, which is confirmed by the order details tool result (`refund_eligible: true`). The agent also states that because the refund is under $100 ($25.50), it executes automatically per policy doc `cw-refunds` ('Refunds of 100 dollars or less execute automatically once the order passes the eligibility check'). All policy claims made are supported by the retrieved document and tool results.",
+  "input_tokens": 1299,
+  "output_tokens": 920
+ },
+ "11053c0a4bcecd36301d234ffa8f2a5a": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "Every policy claim in the assistant's reply\u2014including the 30-day window counting from the delivery date rather than purchase date, the requirement that items match the condition in the listing, and the ability for individual stores to override this policy\u2014is directly supported by policy document cw-returns.",
+  "input_tokens": 1147,
+  "output_tokens": 808
+ },
+ "c84a248e9b9c425ae4f3bddcb4ddf1ef": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant's reply does not make any policy claims regarding return windows, fees, refund methods, eligibility, or alternative remedies. It only confirms the escalation ticket (#152) and mentions the 24-hour SLA returned directly by the ticketing tool.",
+  "input_tokens": 1240,
+  "output_tokens": 590
+ },
+ "8fcc3adbe2e2face951124d90717e10d": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent makes the policy claim that refunds over $100 are queued for review by a human support agent before funds move, which is directly and faithfully supported by policy document cw-refunds.",
+  "input_tokens": 1300,
+  "output_tokens": 886
+ },
+ "cfcfb4404ce3697b08ab71fdc9bd017c": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent accurately outlines the return policy from doc 'cw-returns', including the 30-day return window counting from delivery, the requirement for items to be in the condition described in the store listing, and the note that individual stores may override this window. Every policy claim is fully supported by cw-returns.",
+  "input_tokens": 1117,
+  "output_tokens": 664
+ },
+ "2ee2f668b937d2ea2aa8cdc1b7a19b84": {
+  "verdict": 1,
+  "confidence": 0.95,
+  "critique": "The assistant claims that Cartwheel does not have a direct replacement program and that the typical path is a refund followed by re-ordering. None of the retrieved policy documents (cw-refunds, cw-disputes, cw-cancellations) mention replacements or Cartwheel's policy regarding replacement requests.",
+  "input_tokens": 1398,
+  "output_tokens": 1339
+ },
+ "50a88b3f7c1de01f4282d1f52184a406": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent claims that refunds over $100 are queued for review by a human support agent before any money moves, which is directly supported by policy document cw-refunds. The eligibility claim is supported by the order details returned in the trace.",
+  "input_tokens": 1314,
+  "output_tokens": 256
+ },
+ "24a1d133ab50f4135598934be851abde": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent makes two policy claims: that orders can be cancelled at no cost before shipping, and that refunds go back to the original payment method within 5\u201310 business days. Both claims are directly supported by cw-cancellations and cw-refunds respectively.",
+  "input_tokens": 1192,
+  "output_tokens": 675
+ },
+ "b458e4605fc427c15c5d18d6193b669e": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant states that Juniper Home Goods has a 14-day return window from delivery that overrides Cartwheel's 30-day default, and notes that the return window begins on the delivery date rather than purchase date. Both claims are fully supported by 'store-juniper-home-goods-policy' and 'cw-returns'.",
+  "input_tokens": 1129,
+  "output_tokens": 642
+ },
+ "11e46442f13f2a2c56bddc6bc0b22911": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant does not make any policy claims regarding return windows, fees, refund methods, or eligibility. It only explains the account permission restriction encountered when trying to view the order and offers next steps.",
+  "input_tokens": 1111,
+  "output_tokens": 744
+ },
+ "5cfed8616fcdce2fa84b71fa71b61314": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The assistant's policy claims\u2014that refunds above $100 require human review/approval, and that approved refunds are returned to the original payment method within 5 to 10 business days\u2014are fully supported by doc cw-refunds.",
+  "input_tokens": 1399,
+  "output_tokens": 409
+ },
+ "74095a8f0c574f20ba772ad975702ff0": {
+  "verdict": 0,
+  "confidence": 1.0,
+  "critique": "The agent makes several policy claims: that items can be returned within 30 days of delivery, that refunds under $100 process automatically upon passing eligibility, and that refunds go back to the original payment method within 5 to 10 business days. All of these statements are directly supported by the retrieved documents cw-returns and cw-refunds, with no ungrounded claims or remedies introduced.",
+  "input_tokens": 1805,
+  "output_tokens": 849
+ },
+ "ec53e133c7749a581eaf397e30ce58a2": {
+  "verdict": 0,
+  "confidence": 0.95,
+  "critique": "The assistant informs the user that a support ticket has been created with a 24-hour SLA (supported directly by the ticket tool output) and states that an agent can investigate tracking, package loss, and handle a refund if appropriate. The reply does not make any specific, unsupported policy claims regarding return windows, fees, or eligibility rules.",
+  "input_tokens": 1200,
+  "output_tokens": 989
+ }
+}

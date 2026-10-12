@@ -427,6 +427,18 @@ def find_order(
     return _call(wrapper, hw_tools.find_order, query)
 
 
+@function_tool
+def get_product_details(
+    wrapper: RunContextWrapper[AuthContext], product_id: int
+) -> dict[str, Any]:
+    """Look up a product's title, description, category, price and store by product_id.
+
+    Orders only contain a product_id, so use this to say what was ordered. If the
+    result lists data_issues, tell the user which details are unavailable instead of guessing.
+    """
+    return _call(wrapper, hw_tools.get_product_details, product_id)
+
+
 # Progressive disclosure: a session exposes only the tools its role can use.
 # Fewer tools mean fewer wrong choices and cleaner evals. At dev scale the
 # only difference is that support staff, who have no orders of their own,
@@ -439,6 +451,7 @@ _COMMON_TOOLS = [
     issue_refund,
     cancel_order,
     escalate_to_human,
+    get_product_details,
 ]
 TOOLS_BY_ROLE = {
     "shopper": _COMMON_TOOLS + [list_my_orders, find_order],
